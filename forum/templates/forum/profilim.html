@@ -1,0 +1,534 @@
+{% extends 'forum/base.html' %}
+
+{% block title %}Profilim - DevForum{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-hero-own {
+        background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    }
+    .profile-avatar-lg {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+    .profile-stat-card {
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .profile-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+    }
+    .profile-tab-card:hover {
+        border-color: rgba(13, 110, 253, .35);
+    }
+    .avatar-preview {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    #editProfileModal .modal-dialog {
+        max-height: calc(100vh - 1rem);
+        margin-top: .5rem;
+        margin-bottom: .5rem;
+    }
+    #editProfileModal .modal-content {
+        max-height: calc(100vh - 1rem);
+        overflow: hidden;
+    }
+    #editProfileModal .profile-edit-form {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+    }
+    #editProfileModal .modal-body {
+        overflow-y: auto;
+        flex: 1 1 auto;
+    }
+    #editProfileModal .modal-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        box-shadow: 0 -.35rem .9rem rgba(0,0,0,.06);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<section class="profile-hero-own text-white py-5">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-md-auto text-center">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}?v={{ profile.updated_at|date:'U' }}"
+                         alt="{{ user.username }} profil fotoğrafı"
+                         class="profile-avatar-lg rounded-circle border border-4 border-white bg-white shadow">
+                {% else %}
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ profile.avatar_seed|default:user.username|urlencode }}"
+                         alt="{{ user.username }} avatar"
+                         class="profile-avatar-lg rounded-circle border border-4 border-white bg-white shadow">
+                {% endif %}
+            </div>
+
+            <div class="col-md">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <h2 class="mb-0">{{ user.username }}</h2>
+                    {% if user.is_staff %}
+                        <span class="badge bg-warning text-dark">Moderatör</span>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <span class="badge bg-danger">Yönetici</span>
+                    {% endif %}
+                </div>
+
+                <p class="mb-2 opacity-75">
+                    {% if profile.bio %}
+                        {{ profile.bio }}
+                    {% else %}
+                        Profil açıklamanızı ekleyerek diğer kullanıcıların sizi daha iyi tanımasını sağlayabilirsiniz.
+                    {% endif %}
+                </p>
+
+                <div class="d-flex gap-3 mb-2 flex-wrap small">
+                    {% if profile.location %}
+                        <span><i class="bi bi-geo-alt me-1"></i>{{ profile.location }}</span>
+                    {% endif %}
+                    <span><i class="bi bi-calendar me-1"></i>{{ user.date_joined|date:"F Y" }} tarihinden beri üye</span>
+                    {% if profile.website %}
+                        <span>
+                            <i class="bi bi-link-45deg me-1"></i>
+                            <a href="{{ profile.website }}" class="text-white" target="_blank" rel="noopener">Website</a>
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex gap-2 mt-3 flex-wrap">
+                    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editProfileModal" type="button">
+                        <i class="bi bi-pencil me-1"></i>Profili Düzenle
+                    </button>
+                    <a href="{% url 'kullanici_profil' user.username %}" class="btn btn-outline-light">
+                        <i class="bi bi-eye me-1"></i>Herkese Açık Profili Gör
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-auto text-center">
+                <div class="card bg-white text-dark shadow border-0">
+                    <div class="card-body px-4">
+                        <div class="display-4 fw-bold text-warning">{{ profile.reputation }}</div>
+                        <div class="text-muted">Reputasyon</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Stats Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center shadow-sm profile-stat-card h-100">
+                        <div class="card-body">
+                            <div class="fs-2 fw-bold text-primary">{{ total_questions }}</div>
+                            <div class="text-muted small">Soru</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center shadow-sm profile-stat-card h-100">
+                        <div class="card-body">
+                            <div class="fs-2 fw-bold text-success">{{ total_answers }}</div>
+                            <div class="text-muted small">Cevap</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center shadow-sm profile-stat-card h-100">
+                        <div class="card-body">
+                            <div class="fs-2 fw-bold text-info">{{ accepted_answer_count }}</div>
+                            <div class="text-muted small">En İyi Cevap</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center shadow-sm profile-stat-card h-100">
+                        <div class="card-body">
+                            <div class="fs-2 fw-bold text-warning">{{ follower_count }}</div>
+                            <div class="text-muted small">Takipçi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" href="#activity" data-bs-toggle="tab" role="tab">
+                        <i class="bi bi-activity me-1"></i>Aktivite
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" href="#projects" data-bs-toggle="tab" role="tab">
+                        <i class="bi bi-folder me-1"></i>Projeler
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" href="#questions" data-bs-toggle="tab" role="tab">
+                        <i class="bi bi-question-circle me-1"></i>Sorular
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" href="#answers" data-bs-toggle="tab" role="tab">
+                        <i class="bi bi-chat-left-text me-1"></i>Cevaplar
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Activity Tab -->
+                <div class="tab-pane fade show active" id="activity" role="tabpanel">
+                    {% for item in activity_items %}
+                        <div class="card mb-3 shadow-sm profile-tab-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi {{ item.icon }} fs-4 {{ item.color }}"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="d-flex justify-content-between gap-3">
+                                            <h6 class="mb-1">{{ item.title }}</h6>
+                                            <small class="text-muted text-nowrap">{{ item.created_at|timesince }} önce</small>
+                                        </div>
+                                        <p class="mb-1">
+                                            <a href="{{ item.url }}" class="text-decoration-none">{{ item.text }}</a>
+                                        </p>
+                                        <div class="text-muted small">{{ item.meta }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body text-center py-5">
+                                <i class="bi bi-activity display-5 text-muted"></i>
+                                <h5 class="mt-3">Henüz aktiviteniz yok</h5>
+                                <p class="text-muted mb-3">Soru sorarak veya cevap yazarak profil aktivitenizi oluşturabilirsiniz.</p>
+                                <a href="{% url 'soru_sor' %}" class="btn btn-primary">
+                                    <i class="bi bi-plus-lg me-1"></i>Soru Sor
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Projects Tab -->
+                <div class="tab-pane fade" id="projects" role="tabpanel">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-folder2-open display-4 text-muted"></i>
+                            <h5 class="mt-3 mb-2">Proje modülü henüz aktif değil</h5>
+                            <p class="text-muted mb-0">
+                                Proje sayfalarını daha sonra ekleyeceğimiz için bu alan şimdilik hazır bekliyor.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions Tab -->
+                <div class="tab-pane fade" id="questions" role="tabpanel">
+                    {% for soru in user_questions %}
+                        <div class="card mb-3 shadow-sm profile-tab-card">
+                            <div class="card-body">
+                                <h5 class="mb-2">
+                                    <a href="{% url 'soru_detay' soru.id %}" class="text-decoration-none text-primary">
+                                        {{ soru.title }}
+                                    </a>
+                                    {% if soru.is_solved %}
+                                        <span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Çözüldü</span>
+                                    {% endif %}
+                                </h5>
+                                <p class="text-muted mb-2">{{ soru.body|striptags|truncatechars:180 }}</p>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        {% for tag in soru.tags.all %}
+                                            <a href="{% url 'etiket_detay' tag.slug %}" class="badge bg-light text-dark border me-1 text-decoration-none">{{ tag.name }}</a>
+                                        {% empty %}
+                                            <span class="small text-muted">Etiket yok</span>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="text-muted small">
+                                        {{ soru.vote_score }} oy • {{ soru.answer_count }} cevap • {{ soru.views }} görüntülenme • {{ soru.created_at|timesince }} önce
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="alert alert-info">
+                            Henüz soru sormadınız. <a href="{% url 'soru_sor' %}">İlk sorunuzu sorun.</a>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Answers Tab -->
+                <div class="tab-pane fade" id="answers" role="tabpanel">
+                    {% for cevap in user_answers %}
+                        <div class="card mb-3 shadow-sm profile-tab-card">
+                            <div class="card-body">
+                                <h6 class="text-muted mb-2">
+                                    <a href="{% url 'soru_detay' cevap.question.id %}#answer-{{ cevap.id }}" class="text-decoration-none">
+                                        {{ cevap.question.title }}
+                                    </a>
+                                </h6>
+                                <p class="mb-2">{{ cevap.body|striptags|truncatechars:220 }}</p>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    {% if cevap.is_accepted %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-trophy-fill me-1"></i>En İyi Cevap
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted small">Cevap</span>
+                                    {% endif %}
+                                    <div class="text-muted small">
+                                        {{ cevap.vote_score }} oy • {{ cevap.created_at|timesince }} önce
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="alert alert-info">Henüz cevap yazmadınız.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-4">
+            <!-- Badges Card -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-light">
+                    <i class="bi bi-award me-2"></i><strong>Rozetler</strong>
+                </div>
+                <div class="card-body">
+                    {% for badge in badges %}
+                        <div class="d-flex align-items-center {% if not forloop.last %}mb-3{% endif %}">
+                            <div class="badge {{ badge.class }} fs-5 me-3">{{ badge.emoji }}</div>
+                            <div>
+                                <div class="fw-semibold">{{ badge.title }}</div>
+                                <small class="text-muted">{{ badge.description }}</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Skills Card -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-light">
+                    <i class="bi bi-code-slash me-2"></i><strong>Yetenekler</strong>
+                </div>
+                <div class="card-body">
+                    {% for skill in skill_rows %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between gap-2 align-items-center">
+                                {% if skill.url %}
+                                    <a href="{{ skill.url }}" class="badge {{ skill.class }} text-decoration-none">{{ skill.name }}</a>
+                                {% else %}
+                                    <span class="badge {{ skill.class }}">{{ skill.name }}</span>
+                                {% endif %}
+                                <span class="small text-muted text-end">
+                                    {{ skill.question_total }} soru • {{ skill.answer_total }} cevap
+                                </span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted small mb-0">Profilinize yetenek eklediğinizde burada görünecek.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Followers/Following -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-light">
+                    <i class="bi bi-people me-2"></i><strong>Bağlantılar</strong>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-around text-center mb-3">
+                        <div>
+                            <div class="fs-4 fw-bold">{{ follower_count }}</div>
+                            <div class="text-muted small">Takipçi</div>
+                        </div>
+                        <div class="border-start"></div>
+                        <div>
+                            <div class="fs-4 fw-bold">{{ following_count }}</div>
+                            <div class="text-muted small">Takip</div>
+                        </div>
+                    </div>
+                    <a class="btn btn-outline-primary btn-sm w-100" href="{% url 'kullanicilar' %}">Kullanıcıları Gör</a>
+                </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <i class="bi bi-link-45deg me-2"></i><strong>Sosyal Medya</strong>
+                </div>
+                <div class="card-body">
+                    {% if profile.github %}
+                        <a href="https://github.com/{{ profile.github }}" target="_blank" rel="noopener" class="btn btn-outline-dark btn-sm w-100 mb-2">
+                            <i class="bi bi-github me-2"></i>GitHub
+                        </a>
+                    {% endif %}
+                    {% if profile.linkedin %}
+                        <a href="{{ profile.linkedin }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                            <i class="bi bi-linkedin me-2"></i>LinkedIn
+                        </a>
+                    {% endif %}
+                    {% if profile.twitter %}
+                        <a href="https://twitter.com/{{ profile.twitter }}" target="_blank" rel="noopener" class="btn btn-outline-info btn-sm w-100 mb-2">
+                            <i class="bi bi-twitter me-2"></i>Twitter / X
+                        </a>
+                    {% endif %}
+                    {% if profile.website %}
+                        <a href="{{ profile.website }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm w-100">
+                            <i class="bi bi-globe me-2"></i>Website
+                        </a>
+                    {% endif %}
+                    {% if not profile.github and not profile.linkedin and not profile.twitter and not profile.website %}
+                        <p class="text-muted small mb-0">Sosyal medya bağlantılarınızı profil düzenleme alanından ekleyebilirsiniz.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <form method="post" action="{% url 'profilim' %}" enctype="multipart/form-data" class="profile-edit-form">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProfileModalLabel">Profili Düzenle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Avatar Upload -->
+                    <div class="mb-4 text-center">
+                        {% if profile.avatar %}
+                            <img id="avatarPreview"
+                                 src="{{ profile.avatar.url }}?v={{ profile.updated_at|date:'U' }}"
+                                 alt="avatar"
+                                 class="avatar-preview rounded-circle mb-3 bg-light border">
+                        {% else %}
+                            <img id="avatarPreview"
+                                 src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ profile.avatar_seed|default:user.username|urlencode }}"
+                                 alt="avatar"
+                                 class="avatar-preview rounded-circle mb-3 bg-light border">
+                        {% endif %}
+                        <div>
+                            <label for="avatarUpload" class="btn btn-primary btn-sm mb-0">
+                                <i class="bi bi-upload me-1"></i>Yeni Fotoğraf Yükle
+                            </label>
+                            <input type="file"
+                                   class="d-none"
+                                   id="avatarUpload"
+                                   name="avatar"
+                                   accept="image/png,image/jpeg,image/gif,image/webp">
+                        </div>
+                        <div class="form-text mt-2">JPG, PNG, GIF veya WEBP yükleyebilirsiniz. Maksimum 3 MB önerilir.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="displayName" class="form-label">Görünen Ad</label>
+                        <input type="text" class="form-control" id="displayName" name="username" value="{{ user.username }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Biyografi</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="3" maxlength="500" placeholder="Kendinizden kısaca bahsedin...">{{ profile.bio }}</textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Konum</label>
+                            <input type="text" class="form-control" id="location" name="location" value="{{ profile.location }}" placeholder="İstanbul, Türkiye">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="website" class="form-label">Website</label>
+                            <input type="url" class="form-control" id="website" name="website" value="{{ profile.website }}" placeholder="https://siteadresiniz.com">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="skills" class="form-label">Yetenekler</label>
+                        <input type="text" class="form-control" id="skills" name="skills" value="{{ profile.skills }}" placeholder="React, Node.js, TypeScript, MongoDB">
+                        <div class="form-text">Virgülle ayırarak ekleyin.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Sosyal Medya</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text"><i class="bi bi-github"></i></span>
+                            <input type="text" class="form-control" name="github" value="{{ profile.github }}" placeholder="GitHub kullanıcı adı">
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text"><i class="bi bi-linkedin"></i></span>
+                            <input type="url" class="form-control" name="linkedin" value="{{ profile.linkedin }}" placeholder="LinkedIn profil URL">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-twitter"></i></span>
+                            <input type="text" class="form-control" name="twitter" value="{{ profile.twitter }}" placeholder="Twitter/X kullanıcı adı">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal Et</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const avatarUpload = document.getElementById('avatarUpload');
+    const avatarPreview = document.getElementById('avatarPreview');
+
+    if (avatarUpload && avatarPreview) {
+        avatarUpload.addEventListener('change', function () {
+            const file = this.files && this.files[0];
+            if (!file) return;
+
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                toastr.error('Lütfen JPG, PNG, GIF veya WEBP formatında bir fotoğraf seçin.');
+                this.value = '';
+                return;
+            }
+
+            if (file.size > 3 * 1024 * 1024) {
+                toastr.error('Profil fotoğrafı en fazla 3 MB olabilir.');
+                this.value = '';
+                return;
+            }
+
+            avatarPreview.src = URL.createObjectURL(file);
+        });
+    }
+</script>
+{% endblock %}

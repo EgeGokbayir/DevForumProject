@@ -1,0 +1,266 @@
+{% extends 'forum/base.html' %}
+
+{% block title %}Soru Sor - DevForum{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                        <i class="bi bi-question-circle me-1"></i>Yeni Soru
+                    </span>
+                </div>
+                <h2 class="mb-2">Soru Sor</h2>
+                <p class="text-muted mb-0">Sorunuzu net, tekrar üretilebilir ve teknik detaylarıyla birlikte paylaşın.</p>
+            </div>
+
+            <form method="post" id="questionForm" novalidate>
+                {% csrf_token %}
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <strong><i class="bi bi-pencil-square me-2"></i>Soru Bilgileri</strong>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label for="questionTitle" class="form-label fw-semibold">
+                                    Soru Başlığı <span class="text-danger">*</span>
+                                </label>
+                                <small class="text-muted"><span id="titleCounter">0</span>/150</small>
+                            </div>
+                            <input type="text" class="form-control form-control-lg" id="questionTitle" name="title" placeholder="Örn: Django'da SQLite UNIQUE constraint hatasını nasıl çözerim?" maxlength="150" required>
+                            <div class="form-text">Başlık tek cümle gibi okunmalı ve problemi açıkça anlatmalı.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="questionBody" class="form-label fw-semibold">
+                                Soru Detayı <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="questionBody" name="body" rows="11" placeholder="Probleminizi detaylı yazın...
+
+- Ne yapmaya çalışıyorsunuz?
+- Beklenen sonuç nedir?
+- Aldığınız hata nedir?
+- Şimdiye kadar ne denediniz?
+- Hangi sürümleri kullanıyorsunuz?" required></textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                <div class="form-text">Markdown benzeri format kullanabilirsiniz. Kod için ayrı alanı kullanmanız önerilir.</div>
+                                <small class="text-muted"><span id="bodyCounter">0</span> karakter</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="codeBlock" class="form-label fw-semibold mb-0">
+                                    <i class="bi bi-code-slash me-1"></i>Kod Parçası
+                                </label>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#codeHelp">
+                                    Kod ekleme ipucu
+                                </button>
+                            </div>
+                            <div class="collapse mb-2" id="codeHelp">
+                                <div class="alert alert-secondary small mb-0">
+                                    Hatanın oluştuğu dosya veya fonksiyonu mümkün olduğunca kısa paylaşın. Gizli bilgileri, tokenları ve şifreleri silin.
+                                </div>
+                            </div>
+                            <textarea class="form-control font-monospace bg-dark text-light" id="codeBlock" name="code" rows="8" placeholder="# Kodunuzu buraya ekleyin"></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="questionTags" class="form-label fw-semibold">
+                                <i class="bi bi-tags me-1"></i>Etiketler <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="tags" id="questionTags" placeholder="python, django, sqlite" required>
+                            <div class="form-text">Virgül veya boşlukla ayırın. En fazla 5 etiket kullanın.</div>
+                            <div class="mt-2" id="selectedTagPreview"></div>
+                            <div class="mt-3">
+                                <small class="text-muted me-2">Popüler etiketler:</small>
+                                {% for tag in popular_tags %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addTag('{{ tag.name }}')">{{ tag.name }}</button>
+                                {% empty %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addTag('python')">python</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addTag('django')">django</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addTag('sqlite')">sqlite</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" onclick="addTag('javascript')">javascript</button>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmQuality" required>
+                                <label class="form-check-label" for="confirmQuality">
+                                    Sorumu göndermeden önce başlığı, açıklamayı ve etiketleri kontrol ettim.
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send me-1"></i>Soruyu Yayınla
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="saveDraft()">
+                                <i class="bi bi-save me-1"></i>Taslak Kaydet
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-lg" data-bs-toggle="collapse" data-bs-target="#preview">
+                                <i class="bi bi-eye me-1"></i>Önizleme
+                            </button>
+                            <a href="{% url 'sorular' %}" class="btn btn-outline-secondary btn-lg">
+                                İptal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="collapse" id="preview">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <strong><i class="bi bi-eye me-2"></i>Önizleme</strong>
+                    </div>
+                    <div class="card-body">
+                        <h4 id="previewTitle" class="text-muted">Başlık buraya gelecek...</h4>
+                        <hr>
+                        <div id="previewBody" class="text-muted">Soru detayı buraya gelecek...</div>
+                        <pre id="previewCode" class="bg-dark text-light p-3 rounded mt-3 d-none"><code></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-info shadow-sm mb-3 sticky-lg-top" style="top: 90px;">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-lightbulb me-2"></i><strong>İyi bir soru nasıl sorulur?</strong>
+                </div>
+                <div class="card-body">
+                    <ol class="small mb-0 ps-3">
+                        <li class="mb-2">Sorunu tek cümleyle özetleyen başlık yazın.</li>
+                        <li class="mb-2">Aldığınız hata mesajını tam ve eksiksiz ekleyin.</li>
+                        <li class="mb-2">Denediğiniz çözümleri belirtin.</li>
+                        <li class="mb-2">Kullandığınız teknoloji ve sürümleri yazın.</li>
+                        <li>Gereksiz uzun kod yerine problemi üreten küçük parçayı paylaşın.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card border-warning shadow-sm mb-3">
+                <div class="card-header bg-warning">
+                    <i class="bi bi-shield-check me-2"></i><strong>Paylaşmadan Önce</strong>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0">
+                        <li>API key, şifre, token gibi gizli bilgileri silin.</li>
+                        <li>Ekran görüntüsü yerine hata metnini yazmaya çalışın.</li>
+                        <li>Etiketleri teknoloji adına göre seçin: django, sqlite, python gibi.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <i class="bi bi-tags me-2"></i><strong>Popüler Etiketler</strong>
+                </div>
+                <div class="card-body">
+                    {% for tag in popular_tags %}
+                        <a href="{% url 'etiket_detay' tag.slug %}" class="badge bg-light text-dark border text-decoration-none me-1 mb-2">{{ tag.name }}</a>
+                    {% empty %}
+                        <span class="text-muted small">Henüz etiket yok.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const titleInput = document.getElementById('questionTitle');
+    const bodyInput = document.getElementById('questionBody');
+    const codeInput = document.getElementById('codeBlock');
+    const tagsInput = document.getElementById('questionTags');
+
+    function normalizeTags() {
+        const raw = tagsInput.value.trim();
+        if (!raw) return [];
+        return [...new Set(raw.split(/[\s,]+/).filter(Boolean).map(t => t.toLowerCase()))].slice(0, 5);
+    }
+
+    function updateCountersAndPreview() {
+        document.getElementById('titleCounter').textContent = titleInput.value.length;
+        document.getElementById('bodyCounter').textContent = bodyInput.value.length;
+
+        document.getElementById('previewTitle').textContent = titleInput.value || 'Başlık buraya gelecek...';
+        document.getElementById('previewBody').innerHTML = (bodyInput.value || 'Soru detayı buraya gelecek...').replace(/\n/g, '<br>');
+
+        const previewCode = document.getElementById('previewCode');
+        if (codeInput.value.trim()) {
+            previewCode.classList.remove('d-none');
+            previewCode.querySelector('code').textContent = codeInput.value;
+        } else {
+            previewCode.classList.add('d-none');
+        }
+
+        const selectedTags = normalizeTags();
+        document.getElementById('selectedTagPreview').innerHTML = selectedTags.map(tag =>
+            `<span class="badge bg-primary me-1 mb-1">${tag}</span>`
+        ).join('');
+    }
+
+    function addTag(tag) {
+        const tags = normalizeTags();
+        const cleanTag = tag.toLowerCase().trim();
+        if (!tags.includes(cleanTag) && tags.length < 5) {
+            tags.push(cleanTag);
+        }
+        tagsInput.value = tags.join(', ');
+        updateCountersAndPreview();
+    }
+
+    function saveDraft() {
+        const draft = {
+            title: titleInput.value,
+            body: bodyInput.value,
+            code: codeInput.value,
+            tags: tagsInput.value
+        };
+        localStorage.setItem('devforum_question_draft', JSON.stringify(draft));
+        alert('Taslak tarayıcınıza kaydedildi.');
+    }
+
+    function loadDraft() {
+        const rawDraft = localStorage.getItem('devforum_question_draft');
+        if (!rawDraft) return;
+        try {
+            const draft = JSON.parse(rawDraft);
+            if (!titleInput.value && !bodyInput.value) {
+                titleInput.value = draft.title || '';
+                bodyInput.value = draft.body || '';
+                codeInput.value = draft.code || '';
+                tagsInput.value = draft.tags || '';
+            }
+        } catch (e) {}
+        updateCountersAndPreview();
+    }
+
+    titleInput.addEventListener('input', updateCountersAndPreview);
+    bodyInput.addEventListener('input', updateCountersAndPreview);
+    codeInput.addEventListener('input', updateCountersAndPreview);
+    tagsInput.addEventListener('input', updateCountersAndPreview);
+
+    document.getElementById('questionForm').addEventListener('submit', function(event) {
+        if (normalizeTags().length === 0) {
+            event.preventDefault();
+            alert('En az bir etiket eklemelisiniz.');
+            return;
+        }
+        localStorage.removeItem('devforum_question_draft');
+    });
+
+    loadDraft();
+</script>
+{% endblock %}

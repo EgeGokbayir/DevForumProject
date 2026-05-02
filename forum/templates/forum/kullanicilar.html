@@ -1,0 +1,106 @@
+{% extends 'forum/base.html' %}
+
+{% block title %}Kullanıcılar - DevForum{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                <div>
+                    <h2 class="mb-2">Kullanıcılar</h2>
+                    <p class="text-muted mb-0">Topluluk üyelerini keşfedin.</p>
+                </div>
+
+                <form method="get" action="{% url 'kullanicilar' %}" class="d-flex gap-2">
+                    <input type="search" name="q" value="{{ search_query }}" class="form-control" placeholder="Kullanıcı ara...">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                {% for u in users %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm text-center">
+                            <div class="card-body d-flex flex-column">
+                                <a href="{% url 'kullanici_profil' u.username %}" class="text-decoration-none">
+                                    {% if u.profile.avatar %}
+                                        <img src="{{ u.profile.avatar.url }}?v={{ u.profile.updated_at|date:'U' }}" alt="avatar" class="rounded-circle mb-3" width="80" height="80" style="object-fit: cover;">
+                                    {% else %}
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ u.username|urlencode }}" alt="avatar" class="rounded-circle mb-3" width="80" height="80">
+                                    {% endif %}
+                                    <h5 class="card-title mb-1 text-dark">{{ u.username }}</h5>
+                                </a>
+
+                                <p class="text-muted small mb-2">
+                                    {% if u.profile.location %}{{ u.profile.location }}{% else %}Konum belirtilmemiş{% endif %}
+                                </p>
+
+                                <div class="mb-3">
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-trophy"></i> {{ u.profile.reputation }}
+                                    </span>
+                                </div>
+
+                                <p class="card-text small text-muted flex-grow-1">
+                                    {% if u.profile.bio %}
+                                        {{ u.profile.bio|truncatechars:90 }}
+                                    {% else %}
+                                        Bu kullanıcı henüz profil açıklaması eklememiş.
+                                    {% endif %}
+                                </p>
+
+                                <div class="d-flex justify-content-around text-muted small mb-3">
+                                    <div>
+                                        <div class="fw-bold">{{ u.questions.count }}</div>
+                                        <div>soru</div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ u.answers.count }}</div>
+                                        <div>cevap</div>
+                                    </div>
+                                </div>
+
+                                {% if u.profile.skills %}
+                                    <div class="d-flex gap-1 mb-2 flex-wrap justify-content-center">
+                                        {% for skill in u.profile.skills.split|slice:':3' %}
+                                            <span class="badge bg-light text-dark border">{{ skill }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                {% if user.is_authenticated and user.id != u.id %}
+                                    <form method="post" action="{% url 'kullanici_takip' u.id %}">
+                                        {% csrf_token %}
+                                        {% if u.id in followed_user_ids %}
+                                            <button class="btn btn-primary btn-sm w-100" type="submit">
+                                                <i class="bi bi-person-check me-1"></i>Takip Ediliyor
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-outline-primary btn-sm w-100" type="submit">
+                                                <i class="bi bi-person-plus me-1"></i>Takip Et
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                {% elif user.is_authenticated and user.id == u.id %}
+                                    <a href="{% url 'profilim' %}" class="btn btn-primary btn-sm w-100">Profilim</a>
+                                {% else %}
+                                    <a href="{% url 'giris' %}" class="btn btn-outline-primary btn-sm w-100">Takip etmek için giriş yap</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            Henüz kullanıcı bulunmuyor.
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

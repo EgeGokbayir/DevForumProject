@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim - DevForum</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-stack"></i> DevForum
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Anasayfa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sorular.html">Sorular</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="etiketler.html">Etiketler</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="kullanicilar.html">Kullanıcılar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="projeler.html">Projeler</a>
+                    </li>
+                </ul>
+                <form class="d-flex me-3" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Ara..." style="width: 300px;">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+                <div class="d-flex gap-2 align-items-center">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" class="rounded-circle" width="24" height="24">
+                            ahmet_dev
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="profil.html"><i class="bi bi-person me-2"></i>Profilim</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Ayarlar</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="index.html"><i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Header -->
+    <div class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-auto">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" class="rounded-circle border border-4 border-white" width="150" height="150">
+                </div>
+                <div class="col-md">
+                    <h2 class="mb-2">ahmet_dev</h2>
+                    <p class="mb-2 opacity-75">Full-stack developer. React, Node.js ve TypeScript ile çalışıyorum.</p>
+                    <div class="d-flex gap-3 mb-2">
+                        <span><i class="bi bi-geo-alt me-1"></i>İstanbul, Türkiye</span>
+                        <span><i class="bi bi-calendar me-1"></i>Ocak 2023'ten beri üye</span>
+                        <span><i class="bi bi-link-45deg me-1"></i><a href="#" class="text-white">ahmetdev.com</a></span>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="bi bi-pencil me-1"></i>Profili Düzenle
+                        </button>
+                        <button class="btn btn-outline-light">
+                            <i class="bi bi-gear me-1"></i>Ayarlar
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-auto text-center">
+                    <div class="card bg-white text-dark shadow">
+                        <div class="card-body">
+                            <div class="display-4 fw-bold text-warning">15.2K</div>
+                            <div class="text-muted">Reputasyon</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Stats Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-center shadow-sm">
+                            <div class="card-body">
+                                <div class="fs-2 fw-bold text-primary">234</div>
+                                <div class="text-muted small">Soru</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center shadow-sm">
+                            <div class="card-body">
+                                <div class="fs-2 fw-bold text-success">1.2K</div>
+                                <div class="text-muted small">Cevap</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center shadow-sm">
+                            <div class="card-body">
+                                <div class="fs-2 fw-bold text-info">8</div>
+                                <div class="text-muted small">Proje</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center shadow-sm">
+                            <div class="card-body">
+                                <div class="fs-2 fw-bold text-warning">156</div>
+                                <div class="text-muted small">Takipçi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#activity" data-bs-toggle="tab">
+                            <i class="bi bi-activity me-1"></i>Aktivite
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#projects" data-bs-toggle="tab">
+                            <i class="bi bi-folder me-1"></i>Projeler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#questions" data-bs-toggle="tab">
+                            <i class="bi bi-question-circle me-1"></i>Sorular
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#answers" data-bs-toggle="tab">
+                            <i class="bi bi-chat-left-text me-1"></i>Cevaplar
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Activity Tab -->
+                    <div class="tab-pane fade show active" id="activity">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-chat-left-text fs-4 text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-1">Cevap verdi</h6>
+                                            <small class="text-muted">2 saat önce</small>
+                                        </div>
+                                        <p class="mb-1">
+                                            <a href="soru-detay.html" class="text-decoration-none">React'te state yönetimi için Redux mu Zustand mı kullanmalıyım?</a>
+                                        </p>
+                                        <div class="text-muted small">87 oy aldı</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-star-fill fs-4 text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-1">Proje yıldızlandı</h6>
+                                            <small class="text-muted">5 saat önce</small>
+                                        </div>
+                                        <p class="mb-1">
+                                            <a href="proje-detay.html" class="text-decoration-none">react-todo-advanced</a> projesini yıldızladı
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-question-circle fs-4 text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-1">Soru sordu</h6>
+                                            <small class="text-muted">1 gün önce</small>
+                                        </div>
+                                        <p class="mb-1">
+                                            <a href="soru-detay.html" class="text-decoration-none">TypeScript'te Generic Types nasıl kullanılır?</a>
+                                        </p>
+                                        <div class="text-muted small">3 cevap • 45 görüntülenme</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-folder-plus fs-4 text-info"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-1">Yeni proje oluşturdu</h6>
+                                            <small class="text-muted">2 gün önce</small>
+                                        </div>
+                                        <p class="mb-1">
+                                            <a href="proje-detay.html" class="text-decoration-none">react-todo-advanced</a>
+                                        </p>
+                                        <div class="text-muted small">234 yıldız • 45 fork</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projects Tab -->
+                    <div class="tab-pane fade" id="projects">
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-2">
+                                            <a href="proje-detay.html" class="text-decoration-none">
+                                                <i class="bi bi-book text-primary me-2"></i>react-todo-advanced
+                                            </a>
+                                        </h5>
+                                        <p class="text-muted mb-3">
+                                            Modern ve gelişmiş bir todo uygulaması. TypeScript, Redux Toolkit, Tailwind CSS kullanılarak yapılmıştır.
+                                        </p>
+                                        <div class="d-flex gap-3 align-items-center mb-2">
+                                            <span class="badge bg-primary">TypeScript</span>
+                                            <span class="badge bg-info text-dark">React</span>
+                                            <span class="badge bg-success">Redux</span>
+                                        </div>
+                                        <div class="d-flex gap-4 text-muted small">
+                                            <span><i class="bi bi-star-fill text-warning me-1"></i>234 yıldız</span>
+                                            <span><i class="bi bi-diagram-3 me-1"></i>45 fork</span>
+                                            <span>Güncellendi: 2 saat önce</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-2">
+                                            <a href="proje-detay.html" class="text-decoration-none">
+                                                <i class="bi bi-book text-success me-2"></i>nodejs-api-template
+                                            </a>
+                                        </h5>
+                                        <p class="text-muted mb-3">
+                                            Production-ready Node.js API template with JWT authentication, MongoDB, and Docker support.
+                                        </p>
+                                        <div class="d-flex gap-3 align-items-center mb-2">
+                                            <span class="badge bg-success">Node.js</span>
+                                            <span class="badge bg-dark">Express</span>
+                                            <span class="badge bg-success">MongoDB</span>
+                                        </div>
+                                        <div class="d-flex gap-4 text-muted small">
+                                            <span><i class="bi bi-star-fill text-warning me-1"></i>156 yıldız</span>
+                                            <span><i class="bi bi-diagram-3 me-1"></i>23 fork</span>
+                                            <span>Güncellendi: 1 hafta önce</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Questions Tab -->
+                    <div class="tab-pane fade" id="questions">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="mb-2">
+                                    <a href="soru-detay.html" class="text-decoration-none text-primary">
+                                        TypeScript'te Generic Types nasıl kullanılır?
+                                    </a>
+                                </h5>
+                                <p class="text-muted mb-2">
+                                    TypeScript'te generic types konusunu anlamakta zorlanıyorum. Pratik örneklerle açıklayabilir misiniz?
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-light text-dark border me-1">typescript</span>
+                                        <span class="badge bg-light text-dark border me-1">generics</span>
+                                    </div>
+                                    <div class="text-muted small">
+                                        15 oy • 3 cevap • 45 görüntülenme • 1 gün önce
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="mb-2">
+                                    <a href="soru-detay.html" class="text-decoration-none text-primary">
+                                        React'te state yönetimi için Redux mu Zustand mı kullanmalıyım?
+                                    </a>
+                                </h5>
+                                <p class="text-muted mb-2">
+                                    Yeni bir proje başlatıyorum ve state yönetimi için en iyi çözümü arıyorum. Redux çok popüler ama Zustand daha basit görünüyor.
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-light text-dark border me-1">react</span>
+                                        <span class="badge bg-light text-dark border me-1">state-management</span>
+                                    </div>
+                                    <div class="text-muted small">
+                                        42 oy • 15 cevap • 234 görüntülenme • 2 gün önce
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Answers Tab -->
+                    <div class="tab-pane fade" id="answers">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="text-muted mb-2">
+                                    <a href="soru-detay.html" class="text-decoration-none">React'te state yönetimi için Redux mu Zustand mı kullanmalıyım?</a>
+                                </h6>
+                                <p class="mb-2">
+                                    Her iki kütüphane de harika, ancak kullanım durumunuza göre seçim yapmalısınız. Zustand daha basit ve minimal boilerplate gerektirirken, Redux daha güçlü debugging araçları sunar...
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Kabul Edildi
+                                    </span>
+                                    <div class="text-muted small">
+                                        87 oy • 2 saat önce
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="text-muted mb-2">
+                                    <a href="soru-detay.html" class="text-decoration-none">Docker container'ları production ortamında nasıl optimize edilir?</a>
+                                </h6>
+                                <p class="mb-2">
+                                    Multi-stage build kullanarak image boyutunu önemli ölçüde azaltabilirsiniz. Ayrıca .dockerignore dosyasını doğru yapılandırmak çok önemli...
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Cevap</span>
+                                    <div class="text-muted small">
+                                        23 oy • 1 gün önce
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="col-lg-4">
+                <!-- Badges Card -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-award me-2"></i><strong>Rozetler</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="badge bg-warning text-dark fs-5 me-3">🏆</div>
+                            <div>
+                                <div class="fw-semibold">İlk Cevap</div>
+                                <small class="text-muted">İlk cevabınızı verdiniz</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="badge bg-info fs-5 me-3">⭐</div>
+                            <div>
+                                <div class="fw-semibold">Popüler Soru</div>
+                                <small class="text-muted">Sorunuz 1000+ görüntüleme aldı</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="badge bg-success fs-5 me-3">✅</div>
+                            <div>
+                                <div class="fw-semibold">En İyi Cevap</div>
+                                <small class="text-muted">Cevabınız kabul edildi</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="badge bg-danger fs-5 me-3">🔥</div>
+                            <div>
+                                <div class="fw-semibold">Aktif Üye</div>
+                                <small class="text-muted">30 gün üst üste aktif</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Card -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-code-slash me-2"></i><strong>Yetenekler</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="badge bg-primary">React</span>
+                                <span class="small text-muted">234 soru • 567 cevap</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="badge bg-success">Node.js</span>
+                                <span class="small text-muted">189 soru • 432 cevap</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="badge bg-secondary">TypeScript</span>
+                                <span class="small text-muted">145 soru • 298 cevap</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="badge bg-info text-dark">MongoDB</span>
+                                <span class="small text-muted">98 soru • 176 cevap</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Links -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <i class="bi bi-link-45deg me-2"></i><strong>Sosyal Medya</strong>
+                    </div>
+                    <div class="card-body">
+                        <a href="#" class="btn btn-outline-dark btn-sm w-100 mb-2">
+                            <i class="bi bi-github me-2"></i>GitHub
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                            <i class="bi bi-linkedin me-2"></i>LinkedIn
+                        </a>
+                        <a href="#" class="btn btn-outline-info btn-sm w-100 mb-2">
+                            <i class="bi bi-twitter me-2"></i>Twitter
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm w-100">
+                            <i class="bi bi-globe me-2"></i>Website
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Profili Düzenle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Avatar Upload -->
+                    <div class="mb-4 text-center">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" class="rounded-circle mb-3" width="120" height="120">
+                        <div>
+                            <button class="btn btn-primary btn-sm">
+                                <i class="bi bi-upload me-1"></i>Yeni Fotoğraf Yükle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="displayName" class="form-label">Görünen Ad</label>
+                        <input type="text" class="form-control" id="displayName" value="ahmet_dev">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Biyografi</label>
+                        <textarea class="form-control" id="bio" rows="3">Full-stack developer. React, Node.js ve TypeScript ile çalışıyorum.</textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Konum</label>
+                            <input type="text" class="form-control" id="location" value="İstanbul, Türkiye">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="website" class="form-label">Website</label>
+                            <input type="url" class="form-control" id="website" value="https://ahmetdev.com">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="skills" class="form-label">Yetenekler</label>
+                        <input type="text" class="form-control" id="skills" value="React, Node.js, TypeScript, MongoDB">
+                        <div class="form-text">Virgülle ayırarak ekleyin</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Sosyal Medya</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text"><i class="bi bi-github"></i></span>
+                            <input type="text" class="form-control" placeholder="GitHub kullanıcı adı">
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text"><i class="bi bi-linkedin"></i></span>
+                            <input type="text" class="form-control" placeholder="LinkedIn profil URL">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-twitter"></i></span>
+                            <input type="text" class="form-control" placeholder="Twitter kullanıcı adı">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="bi bi-check-lg me-1"></i>Değişiklikleri Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <h5>DevForum</h5>
+                    <p class="small text-muted">Geliştiriciler için soru-cevap platformu</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>Hızlı Linkler</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white-50 text-decoration-none small">Hakkımızda</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none small">İletişim</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none small">Yardım</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Topluluk</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white-50 text-decoration-none small">Kurallar</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none small">Moderatörler</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none small">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Sosyal Medya</h6>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-github"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-secondary">
+            <div class="text-center text-muted small">
+                © 2024 DevForum. Tüm hakları saklıdır.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
