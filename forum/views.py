@@ -1242,3 +1242,6 @@ def tum_bildirimleri_okundu_yap(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     messages.success(request, 'Tüm bildirimler okundu olarak işaretlendi.')
     return redirect('bildirimler')
+
+def custom_404(request, exception):
+    return render(request, 'forum/404.html', status=404)
