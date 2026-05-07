@@ -10,36 +10,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <style>
-        .notification-menu {
-            width: min(420px, calc(100vw - 24px));
-            max-height: 520px;
-            overflow-y: auto;
-        }
-        .notification-unread {
-            background: rgba(13, 110, 253, .08);
-        }
-        .notification-icon {
-            width: 36px;
-            height: 36px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .question-body p:last-child,
-        .answer-body p:last-child {
-            margin-bottom: 0;
-        }
-        #toast-container > div {
-            opacity: .98;
-            border-radius: .75rem;
-            box-shadow: 0 .75rem 2rem rgba(0, 0, 0, .22);
-        }
-        #toast-container.toast-top-right {
-            top: 76px;
-            right: 18px;
-        }
+        .notification-menu { width: min(420px, 95vw); max-height: 520px; overflow-y: auto; }
+        .notification-unread { background: rgba(13, 110, 253, .08); }
+        .notification-icon { width: 36px; height: 36px; display: inline-flex; align-items:center; justify-content:center; }
+        #toast-container.toast-top-right { top: 76px; right: 18px; }
+        #toast-container > div { opacity: .98; border-radius: .75rem; box-shadow: 0 .75rem 2rem rgba(0,0,0,.22); }
+        .hover-card { transition: all .2s ease-in-out; background: #fff; }
+        .hover-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.10); }
     </style>
-
     {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
@@ -51,42 +29,34 @@
             <i class="bi bi-stack"></i> DevForum
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Menüyü aç/kapat">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link {% if current_url == 'anasayfa' %}active{% endif %}" href="{% url 'anasayfa' %}">Anasayfa</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if current_url == 'sorular' or current_url == 'soru_detay' or current_url == 'soru_sor' %}active{% endif %}" href="{% url 'sorular' %}">Sorular</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if current_url == 'etiketler' or current_url == 'etiket_detay' %}active{% endif %}" href="{% url 'etiketler' %}">Etiketler</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if current_url == 'kullanicilar' or current_url == 'kullanici_profil' or current_url == 'profilim' %}active{% endif %}" href="{% url 'kullanicilar' %}">Kullanıcılar</a>
-                </li>
+                <li class="nav-item"><a class="nav-link {% if current_url == 'anasayfa' %}active{% endif %}" href="{% url 'anasayfa' %}">Anasayfa</a></li>
+                <li class="nav-item"><a class="nav-link {% if current_url == 'sorular' or current_url == 'soru_detay' or current_url == 'soru_sor' %}active{% endif %}" href="{% url 'sorular' %}">Sorular</a></li>
+                <li class="nav-item"><a class="nav-link {% if current_url == 'etiketler' or current_url == 'etiket_detay' %}active{% endif %}" href="{% url 'etiketler' %}">Etiketler</a></li>
+                <li class="nav-item"><a class="nav-link {% if current_url == 'kullanicilar' or current_url == 'kullanici_profil' or current_url == 'profilim' %}active{% endif %}" href="{% url 'kullanicilar' %}">Kullanıcılar</a></li>
+                <li class="nav-item"><a class="nav-link {% if current_url == 'bloglar' or current_url == 'blog_detay' %}active{% endif %}" href="{% url 'bloglar' %}">Blog</a></li>
+                {% if is_admin_nav %}
+                    <li class="nav-item"><a class="nav-link {% if current_url == 'yonetim_paneli' %}active{% endif %}" href="{% url 'yonetim_paneli' %}">Yönetim</a></li>
+                {% endif %}
             </ul>
 
             <form class="d-flex me-lg-3 my-2 my-lg-0" role="search" method="get" action="{% url 'ara' %}">
                 <input class="form-control me-2" name="q" type="search" placeholder="Ara..." value="{{ request.GET.q|default:'' }}" style="min-width: 220px; max-width: 300px;">
-                <button class="btn btn-outline-light" type="submit" aria-label="Ara">
-                    <i class="bi bi-search"></i>
-                </button>
+                <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
             </form>
 
             <div class="d-flex gap-2 align-items-center">
                 {% if user.is_authenticated %}
                     <div class="dropdown">
-                        <button class="btn btn-outline-light position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Bildirimler">
+                        <button class="btn btn-outline-light position-relative" type="button" data-bs-toggle="dropdown" title="Bildirimler">
                             <i class="bi bi-bell"></i>
                             {% if unread_notification_count|default:0 > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {{ unread_notification_count }}
-                                </span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ unread_notification_count }}</span>
                             {% endif %}
                         </button>
                         <div class="dropdown-menu dropdown-menu-end notification-menu shadow p-0">
@@ -94,7 +64,6 @@
                                 <strong>Bildirimler</strong>
                                 <a href="{% url 'bildirimler' %}" class="small text-decoration-none">Tümünü Gör</a>
                             </div>
-
                             {% for bildirim in recent_notifications %}
                                 <a class="dropdown-item py-3 border-bottom {% if not bildirim.is_read %}notification-unread{% endif %}" href="{% url 'bildirim_okundu' bildirim.id %}">
                                     <div class="d-flex gap-2">
@@ -109,39 +78,29 @@
                                     </div>
                                 </a>
                             {% empty %}
-                                <div class="px-3 py-4 text-center text-muted small">
-                                    Henüz bildiriminiz yok.
-                                </div>
+                                <div class="px-3 py-4 text-center text-muted small">Henüz bildiriminiz yok.</div>
                             {% endfor %}
                         </div>
                     </div>
 
+                    <a href="{% url 'mesajlarim' %}" class="btn btn-outline-light position-relative" title="Mesajlarım">
+                        <i class="bi bi-envelope"></i>
+                        {% if unread_message_count|default:0 > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ unread_message_count }}</span>
+                        {% endif %}
+                    </a>
+
                     <div class="dropdown">
-                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {% if user.profile.avatar %}
-                                <img src="{{ user.profile.avatar.url }}?v={{ user.profile.updated_at|date:'U' }}" alt="avatar" class="rounded-circle" width="24" height="24" style="object-fit: cover;">
-                            {% else %}
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ user.username|urlencode }}" alt="avatar" class="rounded-circle" width="24" height="24">
-                            {% endif %}
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            {% include 'forum/partials/avatar.html' with avatar_user=user avatar_size=24 %}
                             {{ user.username }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="{% url 'profilim' %}">
-                                    <i class="bi bi-person me-2"></i>Profilim
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'bildirimler' %}">
-                                    <i class="bi bi-bell me-2"></i>Bildirimler
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'profilim' %}"><i class="bi bi-person me-2"></i>Profilim</a></li>
+                            <li><a class="dropdown-item" href="{% url 'mesajlarim' %}"><i class="bi bi-chat-dots me-2"></i>Mesajlarım</a></li>
+                            <li><a class="dropdown-item" href="{% url 'bildirimler' %}"><i class="bi bi-bell me-2"></i>Bildirimler</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'cikis' %}">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'cikis' %}"><i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap</a></li>
                         </ul>
                     </div>
                 {% else %}
@@ -158,17 +117,27 @@
     {% block content %}{% endblock %}
 </main>
 
+{% if user.is_authenticated %}
+<a href="{% url 'mesajlarim' %}"
+   class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+   style="right: 24px; bottom: 24px; width: 56px; height: 56px; z-index: 1050;"
+   title="Mesajlarım">
+    <i class="bi bi-chat-dots fs-4"></i>
+</a>
+{% endif %}
+
 <footer class="bg-dark text-white mt-auto py-4">
     <div class="container">
         <div class="row gy-3 align-items-center">
             <div class="col-md-6">
                 <h5 class="mb-1"><i class="bi bi-stack"></i> DevForum</h5>
-                <p class="mb-0 small text-white-50">Geliştiriciler için soru-cevap platformu.</p>
+                <p class="mb-0 small text-white-50">Geliştiriciler için soru-cevap ve blog platformu.</p>
             </div>
             <div class="col-md-6 text-md-end">
                 <a class="text-white-50 text-decoration-none small me-3" href="{% url 'sorular' %}">Sorular</a>
                 <a class="text-white-50 text-decoration-none small me-3" href="{% url 'etiketler' %}">Etiketler</a>
-                <a class="text-white-50 text-decoration-none small" href="{% url 'kullanicilar' %}">Kullanıcılar</a>
+                <a class="text-white-50 text-decoration-none small me-3" href="{% url 'kullanicilar' %}">Kullanıcılar</a>
+                <a class="text-white-50 text-decoration-none small" href="{% url 'bloglar' %}">Blog</a>
                 <p class="mb-0 mt-2 small text-white-50">© 2026 DevForum. Tüm hakları saklıdır.</p>
             </div>
         </div>
@@ -181,20 +150,12 @@
 <script>
     toastr.options = {
         closeButton: true,
-        debug: false,
         newestOnTop: true,
         progressBar: true,
         positionClass: 'toast-top-right',
         preventDuplicates: true,
-        onclick: null,
-        showDuration: 250,
-        hideDuration: 300,
         timeOut: 4000,
-        extendedTimeOut: 1500,
-        showEasing: 'swing',
-        hideEasing: 'linear',
-        showMethod: 'fadeIn',
-        hideMethod: 'fadeOut'
+        extendedTimeOut: 1500
     };
 
     {% if messages %}

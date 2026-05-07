@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.apps import apps
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
@@ -61,6 +61,10 @@ class Command(BaseCommand):
         QuestionFavorite = get_optional_model("QuestionFavorite")
         QuestionFollow = get_optional_model("QuestionFollow")
         Notification = get_optional_model("Notification")
+        BlogPost = get_optional_model("BlogPost")
+        BlogFavorite = get_optional_model("BlogFavorite")
+        BlogSaved = get_optional_model("BlogSaved")
+        BlogLike = get_optional_model("BlogLike")
 
         dummy_usernames = [
             "ahmet_dev",
@@ -81,6 +85,18 @@ class Command(BaseCommand):
             if Notification:
                 Notification.objects.filter(user__in=dummy_users).delete()
                 Notification.objects.filter(actor__in=dummy_users).delete()
+
+            if BlogLike:
+                BlogLike.objects.filter(user__in=dummy_users).delete()
+
+            if BlogFavorite:
+                BlogFavorite.objects.filter(user__in=dummy_users).delete()
+
+            if BlogSaved:
+                BlogSaved.objects.filter(user__in=dummy_users).delete()
+
+            if BlogPost:
+                BlogPost.objects.filter(author__in=dummy_users).delete()
 
             if QuestionFavorite:
                 QuestionFavorite.objects.filter(user__in=dummy_users).delete()
@@ -109,7 +125,8 @@ class Command(BaseCommand):
                     "python", "django", "sqlite", "javascript", "react",
                     "typescript", "node.js", "docker", "security", "sql",
                     "html", "css", "api", "git", "linux", "ui-ux",
-                    "performance", "debugging"
+                    "performance", "debugging", "web-development", "backend",
+                    "database", "deployment", "career"
                 ]
             ]
             Tag.objects.filter(slug__in=seed_slugs, questions__isnull=True).delete()
@@ -269,6 +286,13 @@ class Command(BaseCommand):
             profile.save()
             users[item["username"]] = user
 
+        # ege_dev kullanıcısına otomatik Moderator rolü verilir.
+        moderator_group, _ = Group.objects.get_or_create(name="Moderator")
+        users["ege_dev"].groups.add(moderator_group)
+        users["ege_dev"].save()
+
+        self.stdout.write(self.style.SUCCESS("ege_dev kullanıcısına Moderator rolü eklendi."))
+
         self.stdout.write(self.style.HTTP_INFO("Etiketler oluşturuluyor..."))
 
         tag_data = [
@@ -290,6 +314,11 @@ class Command(BaseCommand):
             ("ui-ux", "Kullanıcı arayüzü ve kullanıcı deneyimi tasarımı."),
             ("performance", "Uygulama performansı, veritabanı ve kod optimizasyonu."),
             ("debugging", "Hata ayıklama, log inceleme ve problem çözme."),
+            ("web-development", "Web geliştirme, frontend ve backend süreçleri."),
+            ("backend", "Backend mimarisi, servisler, API ve veri işleme konuları."),
+            ("database", "Veritabanı tasarımı, ilişkiler, sorgular ve optimizasyon."),
+            ("deployment", "Yayınlama, sunucuya alma ve canlı ortam süreçleri."),
+            ("career", "Yazılım kariyeri, staj, portfolyo ve iş başvurusu konuları."),
         ]
 
         tags = {}
@@ -717,6 +746,145 @@ class Command(BaseCommand):
                 for viewer in voters[: min(5, len(voters))]:
                     QuestionView.objects.get_or_create(question=question, user=viewer)
 
+
+        self.stdout.write(self.style.HTTP_INFO("Blog yazıları oluşturuluyor..."))
+
+        created_blogs = []
+
+        if BlogPost:
+            blog_data = [
+                {
+                    "title": "Django ile Soru-Cevap Platformu Geliştirirken Öğrendiklerim",
+                    "summary": "DevForum projesini geliştirirken Django modelleri, view yapısı, template sistemi ve kullanıcı etkileşimleri konusunda öğrendiğim temel noktalar.",
+                    "content": (
+                        "Django ile bir soru-cevap platformu geliştirirken en önemli konulardan biri model yapısını doğru kurmaktır. "
+                        "Kullanıcı, soru, cevap, etiket, oy ve bildirim gibi parçalar ilk bakışta ayrı görünse de aslında birbirleriyle sıkı ilişkilidir.\\n\\n"
+                        "Bu projede önce temel soru-cevap yapısını kurmak, ardından profil, takip, favori ve bildirim gibi özellikleri eklemek daha sağlıklı bir geliştirme süreci sağladı. "
+                        "Özellikle template tarafında tekrar eden kodları partial dosyalara ayırmak projeyi daha yönetilebilir hale getirdi.\\n\\n"
+                        "Django'nun ORM yapısı sayesinde SQLite üzerinde hızlıca geliştirme yapmak mümkün oldu. Ancak migration düzenine dikkat etmek gerekiyor. "
+                        "Model alanı değiştiğinde makemigrations ve migrate komutlarının düzenli çalıştırılması projenin sağlıklı ilerlemesi için önemli."
+                    ),
+                    "tags": ["django", "python", "web-development", "backend"],
+                    "views": 420,
+                    "days_ago": 1,
+                },
+                {
+                    "title": "SQLite ile Geliştirme Yaparken Dikkat Edilmesi Gerekenler",
+                    "summary": "SQLite kullanırken migration, model değişiklikleri ve test verisi oluşturma süreçlerinde karşılaşılabilecek sorunlara pratik çözümler.",
+                    "content": (
+                        "SQLite, Django projelerinde başlangıç ve geliştirme aşaması için oldukça pratik bir veritabanıdır. "
+                        "Ekstra kurulum gerektirmediği için hızlıca projeye başlanabilir. Fakat model yapısı sık değişiyorsa bazı noktalara dikkat etmek gerekir.\\n\\n"
+                        "Yeni bir alan eklerken veritabanında mevcut kayıtlar varsa Django bazen default değer ister. "
+                        "Örneğin auto_now_add=True olan bir alanı sonradan eklemek istediğinizde eski kayıtların bu alanı nasıl dolduracağı belirtilmelidir.\\n\\n"
+                        "Bu tarz durumlarda geliştirme ortamında en doğru yaklaşım önce veritabanı yedeği almak, ardından migrationları kontrollü çalıştırmaktır. "
+                        "Canlı projelerde ise migration silmek veya db.sqlite3 dosyasını kaldırmak yerine veri kaybı yaşatmayacak migration stratejisi uygulanmalıdır."
+                    ),
+                    "tags": ["sqlite", "django", "database", "debugging"],
+                    "views": 315,
+                    "days_ago": 2,
+                },
+                {
+                    "title": "Django Template Yapısında Tekrarlayan Kodları Azaltmak",
+                    "summary": "Base template, avatar partial ve question card partial kullanarak daha temiz ve sürdürülebilir HTML yapısı oluşturma.",
+                    "content": (
+                        "Django template sistemi, tekrar eden HTML yapılarını azaltmak için oldukça kullanışlıdır. "
+                        "Birden fazla sayfada aynı navbar, footer veya kullanıcı avatarı gösteriliyorsa bunları her sayfaya ayrı ayrı yazmak uzun vadede bakım sorunları oluşturur.\\n\\n"
+                        "Bu projede base.html ile genel sayfa iskeleti oluşturuldu. Navbar, footer, Toastr mesajları ve bildirim alanı bu dosyada toplandı. "
+                        "Kullanıcı profil fotoğrafları için avatar.html partial dosyası kullanıldı. Böylece tüm sayfalarda aynı avatar mantığı çalıştı.\\n\\n"
+                        "Aynı şekilde anasayfa ve sorular sayfasında kullanılan soru kartları question_card.html partial dosyasına taşındı. "
+                        "Bu sayede bir kart tasarımı değiştiğinde tüm sayfalarda otomatik olarak aynı görünüm elde edildi."
+                    ),
+                    "tags": ["django", "html", "css", "ui-ux"],
+                    "views": 280,
+                    "days_ago": 3,
+                },
+                {
+                    "title": "Bildirim Sistemi Tasarlarken Nelere Dikkat Edilmeli?",
+                    "summary": "Soru cevapları, takipler, mesajlar ve blog güncellemeleri için kullanılabilir bir bildirim sistemi tasarlama süreci.",
+                    "content": (
+                        "Bir forum veya topluluk platformunda bildirim sistemi kullanıcı etkileşimini artıran önemli özelliklerden biridir. "
+                        "Kullanıcının takip ettiği soruya cevap gelmesi, favori blogunun güncellenmesi veya birinin onu takip etmesi gibi olaylar bildirim olarak gösterilebilir.\\n\\n"
+                        "Bildirim modelinin esnek tasarlanması gerekir. Sadece tek bir içerik türüne bağlı kalmak yerine soru, cevap, etiket, mesaj ve blog gibi farklı modellere opsiyonel bağlantılar kurulabilir. "
+                        "Bu sayede aynı Notification modeli birçok farklı olay için kullanılabilir.\\n\\n"
+                        "Ayrıca bildirimlerin okundu/okunmadı durumunu tutmak kullanıcı deneyimi açısından önemlidir. Navbar üzerinde okunmamış bildirim sayısı göstermek, kullanıcıların yeni olayları hızlı fark etmesini sağlar."
+                    ),
+                    "tags": ["django", "api", "backend", "web-development"],
+                    "views": 360,
+                    "days_ago": 4,
+                },
+                {
+                    "title": "Yeni Mezun Bir Geliştirici İçin Portfolyo Projesi Nasıl Olmalı?",
+                    "summary": "Kurs bitirme veya iş başvurusu için geliştirilen bir Django projesinde hangi özelliklerin öne çıkarılması gerektiği.",
+                    "content": (
+                        "Yeni mezun bir geliştirici için portfolyo projesi sadece çalışan bir uygulama olmamalı, aynı zamanda problem çözme becerisini göstermelidir. "
+                        "Kullanıcı yönetimi, CRUD işlemleri, rol sistemi, bildirimler, dosya yükleme ve arama gibi özellikler projeyi daha güçlü gösterir.\\n\\n"
+                        "DevForum gibi bir soru-cevap platformu, birçok temel web geliştirme konusunu aynı projede topladığı için iyi bir portfolyo örneğidir. "
+                        "Bu tarz projelerde kodun düzenli olması, README dosyasının açıklayıcı yazılması ve demo verilerin bulunması büyük avantaj sağlar.\\n\\n"
+                        "İş başvurularında projeyi anlatırken sadece hangi teknolojilerin kullanıldığını değil, hangi problemleri nasıl çözdüğünüzü de açıklamak önemlidir. "
+                        "Örneğin kullanıcı aktif/pasif sistemi, bildirim altyapısı veya ortak avatar partial yapısı gibi kararlar teknik açıdan değerlidir."
+                    ),
+                    "tags": ["career", "django", "python", "web-development"],
+                    "views": 510,
+                    "days_ago": 5,
+                },
+            ]
+
+            for item in blog_data:
+                blog, _ = BlogPost.objects.get_or_create(
+                    author=users["ege_dev"],
+                    title=item["title"],
+                    defaults={
+                        "summary": item["summary"],
+                        "content": item["content"],
+                        "views": item["views"],
+                        "is_published": True,
+                    }
+                )
+
+                blog.summary = item["summary"]
+                blog.content = item["content"]
+                blog.views = item["views"]
+                blog.is_published = True
+                blog.save()
+
+                blog.tags.clear()
+                for tag_name in item["tags"]:
+                    if tag_name not in tags:
+                        tag_slug = make_tag_slug(tag_name)
+                        tag, _ = Tag.objects.get_or_create(
+                            slug=tag_slug,
+                            defaults={
+                                "name": tag_name,
+                                "description": f"{tag_name} ile ilgili içerikler.",
+                                "is_active": True,
+                            }
+                        )
+                        tags[tag_name] = tag
+
+                    blog.tags.add(tags[tag_name])
+
+                blog_time = timezone.now() - timedelta(days=item["days_ago"])
+                BlogPost.objects.filter(pk=blog.pk).update(created_at=blog_time, updated_at=blog_time)
+                blog.refresh_from_db()
+
+                created_blogs.append(blog)
+
+            if BlogLike:
+                for blog in created_blogs:
+                    for voter_name in ["ahmet_dev", "zeynep_k", "ayse_frontend"]:
+                        BlogLike.objects.get_or_create(blog=blog, user=users[voter_name])
+
+            if BlogFavorite:
+                for blog in created_blogs[:3]:
+                    BlogFavorite.objects.get_or_create(blog=blog, user=users["ahmet_dev"])
+                    BlogFavorite.objects.get_or_create(blog=blog, user=users["zeynep_k"])
+
+            if BlogSaved:
+                for blog in created_blogs[2:]:
+                    BlogSaved.objects.get_or_create(blog=blog, user=users["can_security"])
+                    BlogSaved.objects.get_or_create(blog=blog, user=users["mehmet_ops"])
+
+
         self.stdout.write(self.style.HTTP_INFO("Takip, favori ve bildirim verileri oluşturuluyor..."))
 
         follow_pairs = [
@@ -860,6 +1028,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Dummy veritabanı başarıyla hazırlandı."))
         self.stdout.write("")
         self.stdout.write(self.style.WARNING("Oluşturulan kullanıcıların şifresi: 123456"))
+        self.stdout.write(self.style.SUCCESS("5 adet blog yazısı ege_dev kullanıcısı adına oluşturuldu."))
+        self.stdout.write(self.style.SUCCESS("ege_dev kullanıcısına Moderator rolü otomatik olarak eklendi."))
         self.stdout.write("Örnek kullanıcılar:")
         for username in dummy_usernames:
             self.stdout.write(f" - {username}")

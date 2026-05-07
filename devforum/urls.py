@@ -24,7 +24,7 @@ urlpatterns = [
     path('', include('forum.urls')),
 ]
 
+handler404 = 'forum.views.custom_404'
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-handler404 = 'forum.views.custom_404'

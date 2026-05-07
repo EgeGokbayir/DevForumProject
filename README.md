@@ -1,572 +1,402 @@
-# DevForum - Django Soru Cevap Platformu
+# 🖥️ DevForum
 
-DevForum, geliştiriciler için hazırlanmış Django tabanlı bir soru-cevap platformudur. Proje; kullanıcı kayıt/giriş sistemi, soru sorma, cevap verme, etiketleme, oy verme, en iyi cevap seçme, profil düzenleme, bildirimler, favoriler ve takip sistemi gibi temel forum özelliklerini içerir.
-
-Bu proje kurs tamamlama projesi olarak geliştirilmiştir. Veritabanı olarak SQLite kullanılmaktadır.
+Geliştiriciler için tasarlanmış, Django tabanlı bir topluluk platformu. Kullanıcılar soru sorabilir, cevap verebilir, blog yazısı paylaşabilir, birbirini takip edebilir ve özel mesajlaşabilir.
 
 ---
 
-## İçindekiler
+## 📋 İçindekiler
 
-- [Proje Özeti](#proje-özeti)
-- [Kullanılan Teknolojiler](#kullanılan-teknolojiler)
-- [Temel Özellikler](#temel-özellikler)
-- [Proje Klasör Yapısı](#proje-klasör-yapısı)
-- [Kurulum](#kurulum)
-- [Veritabanı ve Migration](#veritabanı-ve-migration)
-- [Medya / Profil Fotoğrafı Ayarı](#medya--profil-fotoğrafı-ayarı)
-- [Kullanıcı Sistemi](#kullanıcı-sistemi)
-- [Soru ve Cevap Sistemi](#soru-ve-cevap-sistemi)
-- [Etiket Sistemi](#etiket-sistemi)
-- [Favori ve Takip Sistemi](#favori-ve-takip-sistemi)
-- [Bildirim Sistemi](#bildirim-sistemi)
-- [Profil Sistemi](#profil-sistemi)
-- [Toastr Mesaj Sistemi](#toastr-mesaj-sistemi)
-- [Admin Paneli](#admin-paneli)
-- [Test Edilmesi Gereken Akışlar](#test-edilmesi-gereken-akışlar)
-- [Şimdilik Dahil Edilmeyen Bölümler](#şimdilik-dahil-edilmeyen-bölümler)
-- [Geliştirme Notları](#geliştirme-notları)
+- [Özellikler](#-özellikler)
+- [Teknoloji Yığını](#-teknoloji-yığını)
+- [Veritabanı Yapısı](#-veritabanı-yapısı)
+- [Proje Kurulumu](#-proje-kurulumu)
+- [Yönetim Komutları](#-yönetim-komutları)
+- [URL Yapısı](#-url-yapısı)
+- [Rol ve Yetki Sistemi](#-rol-ve-yetki-sistemi)
+- [Bildirim Sistemi](#-bildirim-sistemi)
 
 ---
 
-## Proje Özeti
+## ✨ Özellikler
 
-DevForum, Stack Overflow tarzı bir soru-cevap platformu mantığıyla hazırlanmıştır. Kullanıcılar sisteme kayıt olabilir, giriş yapabilir, soru sorabilir, sorulara cevap verebilir, cevapları oylayabilir ve soru sahibi kendi sorusu için bir cevabı **En İyi Cevap** olarak işaretleyebilir.
+**Soru & Cevap**
+- Soru sorma, düzenleme ve silme
+- Etiket tabanlı sınıflandırma (en fazla 5 etiket)
+- Cevap yazma, cevaba yanıt verme (iç içe yanıt desteği)
+- Cevabı "En İyi Cevap" olarak kabul etme
+- Oy sistemi (yukarı/aşağı) — sorular ve cevaplar için ayrı
+- Soruyu favorilere ekleme ve takip etme
+- Tekil görüntülenme kaydı (QuestionView)
 
-Ayrıca kullanıcılar:
+**Blog**
+- Blog yazısı oluşturma, düzenleme (yalnızca Blogger/Admin rolü)
+- Yorum ve yanıt sistemi (iç içe yorum desteği)
+- Beğeni, favoriye ekleme ve kaydetme
+- Otomatik slug üretimi (benzersizlik kontrolü ile)
+- Taslak / yayınlanmış durumu
 
-- Profil bilgilerini düzenleyebilir.
-- Profil fotoğrafı yükleyebilir.
-- Diğer kullanıcıları takip edebilir.
-- Etiketleri takip edebilir.
-- Soruları favorilere ekleyebilir.
-- Soruları takip edebilir.
-- Bildirimler üzerinden yeni gelişmeleri görebilir.
+**Kullanıcı Sistemi**
+- Kayıt, giriş, çıkış
+- Profil sayfası: avatar, biyografi, konum, GitHub, LinkedIn, Twitter, beceriler
+- DiceBear API ile otomatik avatar (fotoğraf yüklenmemişse)
+- Kullanıcıları takip etme / takipten çıkma
+- Etiket takibi
+
+**Mesajlaşma**
+- Kullanıcılar arasında özel mesajlaşma (Conversation/Message modeli)
+- Okunmamış mesaj sayacı
+
+**Bildirimler**
+- 12 farklı bildirim türü (yeni cevap, takipçi, blog yorumu, mesaj vb.)
+- Tüm bildirimleri okundu olarak işaretleme
+- Bildirim üzerinden ilgili içeriğe yönlendirme
+
+**Arama**
+- Başlık ve içerik bazlı soru & blog arama (`Q` nesnesi ile)
+
+**Yönetim Paneli** *(Admin rolü gerektirir)*
+- Etiket ekleme, düzenleme, aktif/pasif yapma
+- Kullanıcı listesi, rol atama, hesap aktif/pasif yapma
+- İstatistik özeti (soru, cevap, etiket, kullanıcı, blog sayısı)
 
 ---
 
-## Kullanılan Teknolojiler
+## 🛠️ Teknoloji Yığını
 
-| Teknoloji | Açıklama |
+| Katman | Teknoloji |
 |---|---|
-| Python | Backend geliştirme dili |
-| Django | Web framework |
-| SQLite | Varsayılan veritabanı |
-| HTML | Sayfa yapısı |
-| Bootstrap 5 | Arayüz tasarımı |
-| Bootstrap Icons | İkonlar |
-| Toastr.js | Bildirim / toast mesajları |
-| DiceBear Avatar API | Varsayılan avatar görselleri |
-| Django Template Engine | Dinamik HTML render sistemi |
+| Backend | Python 3.x, Django 6.0.4 |
+| Veritabanı | SQLite (geliştirme), geçiş için hazır yapı |
+| Kimlik Doğrulama | Django Auth (`django.contrib.auth`) |
+| Medya | Django FileField (`avatars/` klasörü) |
+| Avatar | DiceBear API 7.x (harici, fotoğrafsız profiller için) |
+| Dil / Saat Dilimi | Türkçe (`tr-tr`), `Europe/Istanbul` |
 
 ---
 
-## Temel Özellikler
+## 🗄️ Veritabanı Yapısı
 
-### Kullanıcı Özellikleri
+Proje tek bir Django uygulaması (`forum`) üzerinde çalışır. Tüm modeller bu uygulama altında tanımlıdır.
 
-- Kayıt olma
-- Giriş yapma
-- Çıkış yapma
-- Profil görüntüleme
-- Profil düzenleme
-- Profil fotoğrafı yükleme
-- Kullanıcı takip etme
-- Kullanıcı profil detayını görüntüleme
+### Temel Modeller
 
-### Soru Özellikleri
+#### `Profile`
+Django'nun yerleşik `User` modeline `OneToOne` ilişkiyle bağlanan genişletilmiş profil.
 
-- Soru oluşturma
-- Soru listeleme
-- Soru detay görüntüleme
-- Soru düzenleme
-- Soruya kod bloğu ekleme
-- Soruya etiket ekleme
-- Soru oylama
-- Soru favorileme
-- Soru takip etme
-- Soru görüntülenme sayısı
-- Sorunun çözülme durumunu gösterme
-
-### Cevap Özellikleri
-
-- Soruya cevap yazma
-- Cevabı düzenleme
-- Cevabı oylama
-- Cevaba yanıt verme
-- Soru sahibinin cevabı **En İyi Cevap** olarak işaretlemesi
-- En iyi cevap kaldırma / değiştirme
-
-### Etiket Özellikleri
-
-- Etiket listeleme
-- Etiket detayına göre soru listeleme
-- Etiket takip etme
-- Takip edilen etikette yeni soru açıldığında bildirim alma
-- Yeni etiket oluştuğunda bildirim alma
-
-### Bildirim Özellikleri
-
-Kullanıcılar sağ üstteki bildirim menüsünden aşağıdaki olayları görebilir:
-
-- Takip ettiği soruya yeni cevap gelmesi
-- Favoriye eklediği soruya yeni cevap gelmesi
-- Kendi cevabına yanıt gelmesi
-- Kendi sorusuna cevap gelmesi
-- Cevabının **En İyi Cevap** seçilmesi
-- Takip ettiği etikette yeni soru açılması
-- Yeni etiket oluşturulması
-- Bir kullanıcının kendisini takip etmesi
+| Alan | Tür | Açıklama |
+|---|---|---|
+| `user` | OneToOneField → User | Temel kullanıcı bağlantısı |
+| `avatar` | FileField | Yüklenen profil fotoğrafı (`avatars/`) |
+| `avatar_seed` | CharField | DiceBear avatar seed değeri |
+| `bio` | TextField | Kullanıcı hakkında kısa metin |
+| `location` | CharField | Şehir / ülke |
+| `website` | URLField | Kişisel web sitesi |
+| `github` | CharField | GitHub kullanıcı adı |
+| `linkedin` | URLField | LinkedIn profil URL'si |
+| `twitter` | CharField | Twitter/X kullanıcı adı |
+| `skills` | CharField | Virgülle ayrılmış beceriler |
+| `reputation` | IntegerField | İtibar puanı |
+| `is_platform_active` | BooleanField | Platform erişim durumu (moderasyon) |
+| `show_favorites_public` | BooleanField | Favoriler herkese açık mı? |
+| `show_saved_public` | BooleanField | Kaydedilenler herkese açık mı? |
 
 ---
 
-## Proje Klasör Yapısı
+#### `Tag`
+Soru ve blog yazılarını sınıflandırmak için kullanılan etiket.
 
-Örnek klasör yapısı:
-
-```text
-DevForumProject/
-│
-├── manage.py
-├── db.sqlite3
-├── media/
-│   └── avatars/
-│
-├── devforum/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-│
-└── forum/
-    ├── migrations/
-    ├── templates/
-    │   └── forum/
-    │       ├── base.html
-    │       ├── index.html
-    │       ├── sorular.html
-    │       ├── soru-detay.html
-    │       ├── soru-sor.html
-    │       ├── etiketler.html
-    │       ├── kullanicilar.html
-    │       ├── kullanici-profil.html
-    │       ├── profilim.html
-    │       ├── giris.html
-    │       ├── kayit.html
-    │       └── bildirimler.html
-    │
-    ├── admin.py
-    ├── apps.py
-    ├── models.py
-    ├── urls.py
-    └── views.py
-```
+| Alan | Tür | Açıklama |
+|---|---|---|
+| `name` | CharField | Benzersiz etiket adı |
+| `slug` | SlugField | URL-dostu kısa ad (otomatik üretilir) |
+| `description` | TextField | Etiket açıklaması |
+| `is_active` | BooleanField | Aktif/pasif durumu |
+| `followers` | M2M → User (through `TagFollow`) | Etiketi takip eden kullanıcılar |
 
 ---
 
-## Kurulum
+#### `Question`
+Platformun ana içerik türü.
 
-### 1. Proje klasörüne gir
+| Alan | Tür | Açıklama |
+|---|---|---|
+| `author` | ForeignKey → User | Soruyu soran kullanıcı |
+| `title` | CharField (max 150) | Soru başlığı |
+| `body` | TextField | Soru detayı |
+| `code` | TextField | İsteğe bağlı kod bloğu |
+| `tags` | M2M → Tag | Etiketler (en fazla 5) |
+| `views` | PositiveIntegerField | Toplam görüntülenme sayısı |
+| `is_solved` | BooleanField | Çözüldü mü? |
+
+**İlgili Modeller:** `QuestionVote`, `QuestionView`, `QuestionFavorite`, `QuestionFollow`
+
+---
+
+#### `Answer`
+Soruya verilen cevap; `parent_answer` alanı sayesinde iç içe yanıt desteği sunar.
+
+| Alan | Tür | Açıklama |
+|---|---|---|
+| `question` | ForeignKey → Question | Bağlı olduğu soru |
+| `author` | ForeignKey → User | Cevabı yazan kullanıcı |
+| `parent_answer` | ForeignKey → self | Üst cevap (yanıt ise dolu, değilse null) |
+| `body` | TextField | Cevap metni |
+| `code` | TextField | İsteğe bağlı kod bloğu |
+| `is_accepted` | BooleanField | En iyi cevap olarak işaretlenmiş mi? |
+
+**İlgili Model:** `AnswerVote`
+
+---
+
+#### `BlogPost`
+Blogger/Admin rolündeki kullanıcıların yayınlayabileceği blog yazısı.
+
+| Alan | Tür | Açıklama |
+|---|---|---|
+| `author` | ForeignKey → User | Yazarı |
+| `title` | CharField (max 200) | Başlık |
+| `slug` | SlugField | Benzersiz URL kısa adı (otomatik) |
+| `summary` | CharField (max 300) | Özet / önizleme metni |
+| `content` | TextField | Tam içerik |
+| `tags` | M2M → Tag | Etiketler |
+| `is_published` | BooleanField | Yayınlanmış mı? |
+| `views` | PositiveIntegerField | Görüntülenme sayısı |
+
+**İlgili Modeller:** `BlogComment`, `BlogLike`, `BlogFavorite`, `BlogSaved`
+
+---
+
+#### `Conversation` & `Message`
+İki kullanıcı arasındaki özel mesajlaşma.
+
+`Conversation` katılımcıları M2M olarak tutar. `Message` ise bir konuşmaya bağlı tek bir iletiyi temsil eder (`is_read` okunma durumunu takip eder).
+
+---
+
+#### `Notification`
+Tüm bildirimler tek bir modelde, `notification_type` alanıyla ayrıştırılır.
+
+| Tür | Açıklama |
+|---|---|
+| `new_answer` | Takip edilen soruya yeni cevap |
+| `best_answer` | Cevap en iyi seçildi |
+| `followed_tag_question` | Takip edilen etikette yeni soru |
+| `new_tag` | Yeni etiket oluşturuldu |
+| `new_follower` | Yeni takipçi |
+| `answer_reply` | Cevaba yanıt geldi |
+| `favorite` | İçerik favorilere eklendi |
+| `message` | Yeni özel mesaj |
+| `blog_new` | Takip edilen kullanıcı blog yayınladı |
+| `blog_updated` | Blog yazısı güncellendi |
+| `blog_comment` | Blog yorumuna yanıt geldi |
+| `system` | Sistem bildirimi |
+
+---
+
+#### İlişki Modelleri (Ara Tablolar)
+
+| Model | Açıklama |
+|---|---|
+| `Follow` | Kullanıcı → Kullanıcı takip |
+| `TagFollow` | Kullanıcı → Etiket takip |
+| `QuestionVote` | Soru oyu (`+1` / `-1`) |
+| `AnswerVote` | Cevap oyu (`+1` / `-1`) |
+| `QuestionView` | Tekil görüntülenme kaydı |
+| `QuestionFavorite` | Soru favoriye ekleme |
+| `QuestionFollow` | Soruyu takip etme |
+| `BlogLike` | Blog beğenisi |
+| `BlogFavorite` | Blog favoriye ekleme |
+| `BlogSaved` | Blog kaydetme |
+
+---
+
+### Migrasyon Geçmişi
+
+| Dosya | İçerik |
+|---|---|
+| `0001_initial` | Temel modeller: Profile, Tag, Question, Answer, QuestionVote, AnswerVote, Follow, TagFollow |
+| `0002_questionview` | QuestionView modeli eklendi |
+| `0003_...` | Answer iç içe yanıt, Notification, QuestionFavorite, QuestionFollow |
+| `0004_profile_avatar` | Profile'a avatar alanı eklendi |
+| `0005_profile_updated_at` | Profile'a updated_at eklendi |
+| `0006_...` | is_platform_active, gizlilik ayarları, Tag'e is_active ve created_at |
+| `0007_...` | BlogPost, BlogComment, BlogLike, BlogFavorite, BlogSaved, Conversation, Message, genişletilmiş Notification |
+
+---
+
+## 🚀 Proje Kurulumu
+
+### Gereksinimler
+
+- Python 3.10+
+- pip
+
+### 1. Depoyu Klonlayın
 
 ```bash
-cd DevForumProject
+git clone https://github.com/kullanici/devforum.git
+cd devforum
 ```
 
-### 2. Sanal ortam oluştur
+### 2. Sanal Ortam Oluşturun ve Aktifleştirin
 
 ```bash
 python -m venv venv
-```
 
-### 3. Sanal ortamı aktif et
-
-Windows için:
-
-```bash
+# Windows
 venv\Scripts\activate
-```
 
-Linux/macOS için:
-
-```bash
+# macOS / Linux
 source venv/bin/activate
 ```
 
-### 4. Django kur
+### 3. Bağımlılıkları Yükleyin
 
 ```bash
 pip install django
 ```
 
-Eğer profil fotoğrafı yükleme için Pillow gerekirse:
+> Proje yalnızca Django'ya bağımlıdır; ekstra kütüphane gerekmez.
+
+### 4. Veritabanını Oluşturun
 
 ```bash
-pip install pillow
-```
-
-### 5. Sunucuyu çalıştır
-
-```bash
-python manage.py runserver
-```
-
-Tarayıcıdan aç:
-
-```text
-http://127.0.0.1:8000/
-```
-
----
-
-## Veritabanı ve Migration
-
-Model değişikliklerinden sonra aşağıdaki komutlar çalıştırılmalıdır:
-
-```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-Admin kullanıcısı oluşturmak için:
+### 5. Rolleri Oluşturun
+
+```bash
+python manage.py setup_devforum_roles
+```
+
+Bu komut `Admin`, `Moderator` ve `Blogger` gruplarını oluşturur.
+
+### 6. Süper Kullanıcı Oluşturun
 
 ```bash
 python manage.py createsuperuser
 ```
 
----
+### 7. (İsteğe Bağlı) Örnek Veri Yükleyin
 
-## Medya / Profil Fotoğrafı Ayarı
-
-Profil fotoğrafı yükleme özelliğinin çalışması için `settings.py` dosyasının sonuna şu ayarlar eklenmelidir:
-
-```python
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+```bash
+python manage.py seed_devforum
 ```
 
-Ana proje `urls.py` dosyası şu yapıda olmalıdır:
+Bu komut 8 örnek kullanıcı, sorular, cevaplar, blog yazıları ve bildirimler oluşturur. Tüm örnek kullanıcıların şifresi `123456`'dır.
 
-```python
-from django.conf import settings
-from django.conf.urls.static import static
-from django.contrib import admin
-from django.urls import include, path
+Örnek verileri sıfırlayıp yeniden yüklemek için:
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('forum.urls')),
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```bash
+python manage.py seed_devforum --reset
 ```
 
-Profil fotoğrafı yüklendikten sonra tüm sayfalarda aynı fotoğraf gösterilir. Eğer kullanıcının yüklediği fotoğraf yoksa DiceBear üzerinden varsayılan avatar gösterilir.
+### 8. Geliştirme Sunucusunu Başlatın
+
+```bash
+python manage.py runserver
+```
+
+Tarayıcıda `http://127.0.0.1:8000` adresini açın.
 
 ---
 
-## Kullanıcı Sistemi
+## 🔧 Yönetim Komutları
 
-Kullanıcı sistemi Django'nun hazır `User` modeli üzerinden çalışır.
-
-Kullanıcılar:
-
-- Kullanıcı adı
-- E-posta
-- Şifre
-
-ile kayıt olabilir.
-
-Girişte kullanıcı adı veya e-posta kullanılabilir.
-
-Kayıt olan her kullanıcı için otomatik olarak bir `Profile` kaydı oluşturulur.
-
----
-
-## Soru ve Cevap Sistemi
-
-Kullanıcılar giriş yaptıktan sonra soru sorabilir.
-
-Soru oluştururken girilen alanlar:
-
-- Başlık
-- Soru detayı
-- Kod parçası
-- Etiketler
-
-Soru sahibi kendi sorusunu detay sayfasında başka sayfaya gitmeden düzenleyebilir.
-
-Cevap sistemi:
-
-- Kullanıcı cevap yazabilir.
-- Kendi cevabını düzenleyebilir.
-- Başka bir cevaba yanıt yazabilir.
-- Soru sahibi bir cevabı **En İyi Cevap** olarak seçebilir.
-
----
-
-## Etiket Sistemi
-
-Soru sorarken yazılan etiketler otomatik olarak oluşturulur.
-
-Etiketlerde slug çakışmasını önlemek için özel slug oluşturma mantığı kullanılmıştır.
-
-Örnek dönüşümler:
-
-| Girilen Etiket | Slug |
+| Komut | Açıklama |
 |---|---|
-| C# | csharp |
-| C++ | cpp |
-| .NET | dotnet |
-| Node.js | nodejs |
-| Python | python |
-
-Etiketler sayfasında kullanıcı bir etiketi takip ediyorsa butonda **Takip Ediliyor**, takip etmiyorsa **Takip Et** yazar.
-
----
-
-## Favori ve Takip Sistemi
-
-Soru detay sayfasında kullanıcı:
-
-- Soruyu favorilerine ekleyebilir.
-- Soruyu takip edebilir.
-
-Favori veya takip edilen soruya yeni cevap geldiğinde kullanıcıya bildirim gönderilir.
+| `python manage.py migrate` | Veritabanı migrasyonlarını uygular |
+| `python manage.py setup_devforum_roles` | Admin, Moderator, Blogger gruplarını oluşturur |
+| `python manage.py seed_devforum` | Örnek verileri yükler |
+| `python manage.py seed_devforum --reset` | Örnek verileri temizleyip yeniden yükler |
+| `python manage.py createsuperuser` | Admin kullanıcısı oluşturur |
+| `python manage.py collectstatic` | Statik dosyaları toplar (üretim için) |
 
 ---
 
-## Bildirim Sistemi
+## 🗺️ URL Yapısı
 
-Bildirimler sağ üstteki navbar alanında gösterilir.
-
-Bildirim dropdown'ında son bildirimler listelenir. Ayrıca tüm bildirimleri görmek için `/bildirimler/` sayfası kullanılabilir.
-
-Bildirimler okundu / okunmadı mantığına sahiptir.
-
-Bildirim örnekleri:
-
-- “Takip ettiğiniz soruya yeni cevap geldi.”
-- “Cevabınız En İyi Cevap seçildi.”
-- “Takip ettiğiniz etikette yeni soru açıldı.”
-- “Yeni bir etiket oluşturuldu.”
-- “Bir kullanıcı sizi takip etti.”
-- “Cevabınıza yanıt geldi.”
+| Grup | Örnek URL | Açıklama |
+|---|---|---|
+| Genel | `/` | Ana sayfa |
+| Sorular | `/sorular/`, `/soru/<id>/` | Liste ve detay |
+| Soru İşlemleri | `/soru-sor/`, `/soru/<id>/duzenle/` | Oluşturma, düzenleme, silme |
+| Cevaplar | `/cevap/<id>/duzenle/`, `/cevap/<id>/kabul-et/` | Düzenleme, kabul, yanıt |
+| Etiketler | `/etiketler/`, `/etiket/<slug>/` | Liste ve detay |
+| Kullanıcılar | `/kullanicilar/`, `/kullanici/<username>/` | Liste ve profil |
+| Auth | `/giris/`, `/kayit/`, `/cikis/` | Giriş, kayıt, çıkış |
+| Arama | `/ara/` | Genel arama |
+| Bildirimler | `/bildirimler/` | Liste ve okundu işaretleme |
+| Mesajlar | `/mesajlar/`, `/mesajlar/<id>/` | Liste ve konuşma detayı |
+| Blog | `/blog/`, `/blog/<slug>/` | Liste ve detay |
+| Yönetim | `/yonetim/` | Admin paneli (rol gerektirir) |
 
 ---
 
-## Profil Sistemi
+## 🔐 Rol ve Yetki Sistemi
 
-Kullanıcı kendi profil sayfasından bilgilerini düzenleyebilir.
+Proje Django'nun `Group` modeli üzerine inşa edilmiş üç rol kullanır:
 
-Düzenlenebilen alanlar:
+| Rol | Yetkiler |
+|---|---|
+| **Admin** | Yönetim paneline tam erişim; etiket yönetimi, kullanıcı rol/durum yönetimi |
+| **Moderator** | Tüm içerikleri (soru, cevap) düzenleme ve silme yetkisi |
+| **Blogger** | Blog yazısı oluşturma ve düzenleme yetkisi |
 
-- Kullanıcı adı
-- E-posta
-- Biyografi
-- Konum
-- Website
-- GitHub kullanıcı adı
-- LinkedIn bağlantısı
-- Twitter/X kullanıcı adı
-- Yetenekler
-- Avatar seed
-- Profil fotoğrafı
+Süper kullanıcılar (`is_superuser=True`) tüm yetkilere sahiptir.
 
-Profil düzenleme modalında **İptal Et** ve **Kaydet** butonları alt kısımda sabit durur.
+`is_platform_active = False` olan kullanıcılar platforma giriş yapabilir ancak içerik oluşturamaz, oy kullanamaz ve yorum yapamaz.
 
-Yetenekler kısmında sadece kullanıcının profilinde yazdığı yetenekler görünür. Kullanıcının eklemediği bir yetenek otomatik gösterilmez.
+---
 
-Yetenek kartında şu format kullanılır:
+## 🔔 Bildirim Sistemi
 
-```text
-Yetenek Adı    X soru • Y cevap
+Bildirimler `signals.py` aracılığıyla değil, doğrudan view fonksiyonlarından tetiklenir. Her kritik olayda (`notify_*` yardımcı fonksiyonları) ilgili kullanıcılara `Notification` nesnesi oluşturulur.
+
+Bildirim hedef URL'leri `Notification.target_url()` metodu aracılığıyla dinamik olarak hesaplanır; böylece her bildirim türü kullanıcıyı doğru sayfaya yönlendirir.
+
+---
+
+## 📁 Proje Dizin Yapısı
+
 ```
-
-Buradaki soru ve cevap sayıları, kullanıcının ilgili etiketteki soru ve cevaplarına göre hesaplanır.
-
----
-
-## Toastr Mesaj Sistemi
-
-Django `messages` sistemi Toastr ile görsel hale getirilmiştir.
-
-View içinde kullanılan mesajlar:
-
-```python
-messages.success(request, "İşlem başarıyla tamamlandı.")
-messages.error(request, "Bir hata oluştu.")
-messages.warning(request, "Lütfen eksik alanları doldurun.")
-messages.info(request, "Bilgilendirme mesajı.")
-```
-
-sayfada otomatik olarak sağ üstte toast bildirimi şeklinde gösterilir.
-
----
-
-## Admin Paneli
-
-Admin paneline şu adresten girilir:
-
-```text
-http://127.0.0.1:8000/admin/
-```
-
-Admin panelinden yönetilebilen temel modeller:
-
-- Profile
-- Tag
-- Question
-- Answer
-- QuestionVote
-- AnswerVote
-- Follow
-- TagFollow
-- QuestionView
-- Notification
-- FavoriteQuestion
-- QuestionFollow
-- AnswerReply
-
----
-
-## Test Edilmesi Gereken Akışlar
-
-Proje tamamlandıktan sonra aşağıdaki akışlar test edilmelidir:
-
-### Kullanıcı Akışı
-
-- Kullanıcı kayıt oluyor mu?
-- Giriş yapabiliyor mu?
-- Çıkış yapabiliyor mu?
-- Profilini düzenleyebiliyor mu?
-- Profil fotoğrafı yükleyebiliyor mu?
-- Profil fotoğrafı tüm sayfalarda güncelleniyor mu?
-
-### Soru Akışı
-
-- Kullanıcı soru sorabiliyor mu?
-- Soru listede görünüyor mu?
-- Soru detay sayfası açılıyor mu?
-- Soru sahibi soruyu düzenleyebiliyor mu?
-- Etiketler doğru oluşuyor mu?
-- Soru görüntülenme sayısı aynı kullanıcıda sürekli artmıyor mu?
-
-### Cevap Akışı
-
-- Kullanıcı cevap yazabiliyor mu?
-- Cevap sahibi cevabını düzenleyebiliyor mu?
-- Başka kullanıcı cevaba yanıt verebiliyor mu?
-- Soru sahibi cevabı **En İyi Cevap** seçebiliyor mu?
-- En iyi cevap seçilince soru çözüldü olarak görünüyor mu?
-
-### Bildirim Akışı
-
-- Takip edilen soruya cevap gelince bildirim oluşuyor mu?
-- Favori soruya cevap gelince bildirim oluşuyor mu?
-- Cevap en iyi cevap seçilince bildirim oluşuyor mu?
-- Takip edilen etikette soru açılınca bildirim oluşuyor mu?
-- Kullanıcı takip edilince bildirim oluşuyor mu?
-
-### Etiket Akışı
-
-- Etiketler listeleniyor mu?
-- Etiket takip ediliyor mu?
-- Takip edilen etikette yeni soru açılınca bildirim geliyor mu?
-
----
-
-## Şimdilik Dahil Edilmeyen Bölümler
-
-Aşağıdaki sayfalar proje geliştirme sürecinde bilerek sonraya bırakılmıştır:
-
-- `projeler.html`
-- `proje-olustur.html`
-- `proje-detay.html`
-
-Bu sayfalar daha sonra ayrı bir `Project` modeli ile geliştirilebilir.
-
-İleride eklenebilecek proje özellikleri:
-
-- Proje oluşturma
-- Proje listeleme
-- Proje detay sayfası
-- Proje yıldızlama
-- Proje fork sistemi
-- Proje etiketleri
-- Proje yorumları
-- Proje dosya / README alanı
-
----
-
-## Geliştirme Notları
-
-Bu projede statik HTML dosyaları Django template yapısına dönüştürülmüştür.
-
-Yapılan temel dönüşümler:
-
-- Statik `.html` linkleri `{% url %}` yapısına çevrildi.
-- Tekrarlanan navbar/footer yapısı `base.html` içine alındı.
-- Sayfalar `{% extends 'forum/base.html' %}` yapısına geçirildi.
-- Dummy kullanıcı, etiket, soru ve cevaplar kaldırıldı.
-- Veriler Django modellerinden dinamik olarak getirildi.
-- Bootstrap tasarımı korunarak backend bağlantıları eklendi.
-- Toastr ile mesaj sistemi iyileştirildi.
-- Profil fotoğrafı yükleme ve tüm sayfalarda gösterme sistemi eklendi.
-- Soru detay sayfası orijinal tasarıma yakın şekilde tamamen dinamik hale getirildi.
-
----
-
-## Çalıştırma Özeti
-
-Yeni kurulumdan sonra sırasıyla:
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-pip install django pillow
-python manage.py makemigrations
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
-```
-
-Tarayıcı:
-
-```text
-http://127.0.0.1:8000/
+devforum/
+├── devforum/               # Proje konfigürasyonu
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+├── forum/                  # Ana uygulama
+│   ├── migrations/         # Veritabanı migrasyonları
+│   ├── management/
+│   │   └── commands/
+│   │       ├── seed_devforum.py
+│   │       └── setup_devforum_roles.py
+│   ├── templates/
+│   │   └── forum/          # HTML şablonları
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── admin.py
+│   ├── apps.py
+│   └── signals.py
+├── media/                  # Yüklenen dosyalar (avatar vb.)
+├── db.sqlite3              # SQLite veritabanı
+└── manage.py
 ```
 
 ---
 
-## Proje Durumu
+## ⚙️ Ayarlar Özeti (`settings.py`)
 
-Şu an çalışan ana modüller:
-
-- Kullanıcı kayıt/giriş/çıkış
-- Profil düzenleme
-- Profil fotoğrafı yükleme
-- Kullanıcı listeleme
-- Kullanıcı profil sayfası
-- Soru sorma
-- Soru listeleme
-- Soru detay
-- Soru düzenleme
-- Cevap yazma
-- Cevap düzenleme
-- Cevaba yanıt verme
-- Oy verme
-- En iyi cevap seçme
-- Etiket listeleme
-- Etiket takip etme
-- Favori soru
-- Soru takip
-- Bildirim sistemi
-- Toastr mesaj sistemi
-
----
-
-## Lisans
-
-Bu proje eğitim / kurs tamamlama amacıyla hazırlanmıştır.
+| Ayar | Değer |
+|---|---|
+| `DEBUG` | `True` (geliştirme) |
+| `DATABASES` | SQLite (`db.sqlite3`) |
+| `LANGUAGE_CODE` | `tr-tr` |
+| `TIME_ZONE` | `Europe/Istanbul` |
+| `LOGIN_URL` | `giris` |
+| `LOGIN_REDIRECT_URL` | `anasayfa` |
+| `MEDIA_ROOT` | `BASE_DIR / 'media'` |
+| `MEDIA_URL` | `/media/` |

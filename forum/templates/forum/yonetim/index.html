@@ -1,0 +1,20 @@
+{% extends 'forum/base.html' %}
+{% block title %}Yönetim Paneli - DevForum{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Yönetim Paneli</h2>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md"><div class="card text-center shadow-sm"><div class="card-body"><div class="fs-2 fw-bold text-primary">{{ question_count }}</div><div class="text-muted">Soru</div></div></div></div>
+        <div class="col-md"><div class="card text-center shadow-sm"><div class="card-body"><div class="fs-2 fw-bold text-success">{{ answer_count }}</div><div class="text-muted">Cevap</div></div></div></div>
+        <div class="col-md"><div class="card text-center shadow-sm"><div class="card-body"><div class="fs-2 fw-bold text-info">{{ tag_count }}</div><div class="text-muted">Etiket</div></div></div></div>
+        <div class="col-md"><div class="card text-center shadow-sm"><div class="card-body"><div class="fs-2 fw-bold text-warning">{{ user_count }}</div><div class="text-muted">Kullanıcı</div></div></div></div>
+        <div class="col-md"><div class="card text-center shadow-sm"><div class="card-body"><div class="fs-2 fw-bold text-danger">{{ blog_count }}</div><div class="text-muted">Blog</div></div></div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6"><a href="{% url 'yonetim_etiketler' %}" class="text-decoration-none"><div class="card hover-card h-100"><div class="card-body"><h4><i class="bi bi-tags me-2"></i>Etiket Yönetimi</h4><p class="text-muted mb-0">Etiket ekle, düzenle, aktif/pasif yap.</p></div></div></a></div>
+        <div class="col-md-6"><a href="{% url 'yonetim_kullanicilar' %}" class="text-decoration-none"><div class="card hover-card h-100"><div class="card-body"><h4><i class="bi bi-people me-2"></i>Kullanıcı Yönetimi</h4><p class="text-muted mb-0">Rolleri düzenle, kullanıcıları aktif/pasif yap.</p></div></div></a></div>
+    </div>
+</div>
+{% endblock %}

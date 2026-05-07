@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -16,8 +17,21 @@ class Profile(models.Model):
     skills = models.CharField(max_length=255, blank=True)
     reputation = models.IntegerField(default=0)
     avatar_seed = models.CharField(max_length=100, default='Felix')
+
+    # Kullanıcı giriş yapabilir ama içerik üretmesi engellenebilir.
+    is_platform_active = models.BooleanField(default=True)
+
+    # Profil gizlilik ayarları
+    show_favorites_public = models.BooleanField(default=False)
+    show_saved_public = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def avatar_url(self):
+        if self.avatar:
+            return self.avatar.url
+        return f'https://api.dicebear.com/7.x/avataaars/svg?seed={self.avatar_seed or self.user.username}'
 
     def __str__(self):
         return self.user.username
@@ -26,6 +40,9 @@ class Profile(models.Model):
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=60, unique=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    # Mevcut tablolara eklenirken migration prompt'u vermemesi için default kullanıldı.
+    created_at = models.DateTimeField(default=timezone.now)
     description = models.TextField(blank=True)
     followers = models.ManyToManyField(User, through='TagFollow', related_name='followed_tags', blank=True)
 
@@ -163,6 +180,103 @@ class QuestionFollow(models.Model):
         return f'{self.user.username} takip: {self.question.title}'
 
 
+class Conversation(models.Model):
+    participants = models.ManyToManyField(User, related_name='conversations')
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def other_participant(self, user):
+        return self.participants.exclude(id=user.id).first()
+
+    def last_message(self):
+        return self.messages.order_by('-created_at').first()
+
+    def __str__(self):
+        return ", ".join(self.participants.values_list('username', flat=True))
+
+
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    body = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.sender.username}: {self.body[:40]}'
+
+
+class BlogPost(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
+    summary = models.CharField(max_length=300)
+    content = models.TextField()
+    tags = models.ManyToManyField(Tag, related_name='blog_posts', blank=True)
+    is_published = models.BooleanField(default=True)
+    views = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title) or 'blog'
+            slug = base_slug
+            counter = 1
+
+            while BlogPost.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f'{base_slug}-{counter}'
+                counter += 1
+
+            self.slug = slug
+
+        super().save(*args, **kwargs)
+
+    def like_count(self):
+        return self.likes.count()
+
+    def comment_count(self):
+        return self.comments.count()
+
+    def __str__(self):
+        return self.title
+
+
+class BlogComment(models.Model):
+    blog = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_comments')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.blog.title} - {self.author.username}'
+
+
+class BlogLike(models.Model):
+    blog = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('blog', 'user')
+
+
+class BlogFavorite(models.Model):
+    blog = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='favorites')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_blogs')
+
+    class Meta:
+        unique_together = ('blog', 'user')
+
+
+class BlogSaved(models.Model):
+    blog = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='saved_by')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_blogs')
+
+    class Meta:
+        unique_together = ('blog', 'user')
+
+
 class Notification(models.Model):
     TYPE_CHOICES = [
         ('new_answer', 'Yeni cevap'),
@@ -172,6 +286,10 @@ class Notification(models.Model):
         ('new_follower', 'Yeni takipçi'),
         ('answer_reply', 'Cevabına yanıt'),
         ('favorite', 'Favori'),
+        ('message', 'Mesaj'),
+        ('blog_new', 'Yeni blog'),
+        ('blog_updated', 'Blog güncellendi'),
+        ('blog_comment', 'Blog yorumu'),
         ('system', 'Sistem'),
     ]
 
@@ -180,9 +298,13 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=40, choices=TYPE_CHOICES, default='system')
     title = models.CharField(max_length=160)
     message = models.TextField(blank=True)
+
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+    blog = models.ForeignKey(BlogPost, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
+
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -190,6 +312,10 @@ class Notification(models.Model):
         ordering = ['-created_at']
 
     def target_url(self):
+        if self.conversation_id:
+            return reverse('mesaj_detay', args=[self.conversation_id])
+        if self.blog_id:
+            return reverse('blog_detay', args=[self.blog.slug])
         if self.answer_id:
             return f"{reverse('soru_detay', args=[self.answer.question_id])}#answer-{self.answer_id}"
         if self.question_id:
@@ -209,6 +335,10 @@ class Notification(models.Model):
             'new_follower': 'bi-person-plus-fill',
             'answer_reply': 'bi-reply-fill',
             'favorite': 'bi-star-fill',
+            'message': 'bi-envelope-fill',
+            'blog_new': 'bi-journal-richtext',
+            'blog_updated': 'bi-pencil-square',
+            'blog_comment': 'bi-chat-left-text-fill',
             'system': 'bi-bell-fill',
         }
         return icons.get(self.notification_type, 'bi-bell-fill')

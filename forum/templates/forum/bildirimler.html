@@ -1,44 +1,29 @@
 {% extends 'forum/base.html' %}
-
 {% block title %}Bildirimler - DevForum{% endblock %}
-
 {% block content %}
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h2 class="mb-1"><i class="bi bi-bell me-2"></i>Bildirimler</h2>
-            <p class="text-muted mb-0">Takip ettiğiniz sorular, etiketler ve kullanıcı etkileşimleri burada görünür.</p>
-        </div>
-        <a href="{% url 'tum_bildirimleri_okundu_yap' %}" class="btn btn-outline-primary">
-            <i class="bi bi-check2-all me-1"></i>Tümünü Okundu Yap
-        </a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Bildirimler</h2>
+        <a href="{% url 'bildirimleri_okundu_yap' %}" class="btn btn-outline-primary btn-sm">Tümünü Okundu Yap</a>
     </div>
 
     <div class="card shadow-sm">
         <div class="list-group list-group-flush">
             {% for bildirim in notifications %}
-                <a href="{% url 'bildirim_okundu' bildirim.id %}" class="list-group-item list-group-item-action {% if not bildirim.is_read %}list-group-item-primary{% endif %}">
-                    <div class="d-flex gap-3">
-                        <span class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width:42px;height:42px;">
-                            <i class="bi {{ bildirim.icon_class }}"></i>
-                        </span>
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between gap-2">
-                                <h6 class="mb-1">{{ bildirim.title }}</h6>
-                                <small class="text-muted text-nowrap">{{ bildirim.created_at|timesince }} önce</small>
-                            </div>
-                            <p class="mb-1 text-muted">{{ bildirim.message }}</p>
-                            {% if bildirim.actor %}
-                                <small class="text-muted">İşlem yapan: {{ bildirim.actor.username }}</small>
-                            {% endif %}
-                        </div>
+            <a href="{% url 'bildirim_okundu' bildirim.id %}" class="list-group-item list-group-item-action {% if not bildirim.is_read %}list-group-item-primary{% endif %}">
+                <div class="d-flex gap-3">
+                    <span class="notification-icon rounded-circle bg-primary-subtle text-primary">
+                        <i class="bi {{ bildirim.icon_class }}"></i>
+                    </span>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">{{ bildirim.title }}</div>
+                        <div class="text-muted small">{{ bildirim.message }}</div>
+                        <div class="text-muted small mt-1">{{ bildirim.created_at|timesince }} önce</div>
                     </div>
-                </a>
-            {% empty %}
-                <div class="p-5 text-center text-muted">
-                    <i class="bi bi-bell-slash fs-1 d-block mb-2"></i>
-                    Henüz bildiriminiz yok.
                 </div>
+            </a>
+            {% empty %}
+            <div class="p-5 text-center text-muted">Henüz bildiriminiz yok.</div>
             {% endfor %}
         </div>
     </div>
